@@ -9,9 +9,9 @@ use std::path::PathBuf;
 
 use config::AppConfig;
 use info::{
-    cpu, de_wm, disk, distro_slug, get_gpu_name as info_gpu_name, get_gpu_temperature, gpu as info_gpu,
-    kernel, memory, os, os_age, packages, resolution, shell, swap, system_for_fetch, terminal,
-    terminal_font, theme, uptime, user_host,
+    cpu, de_wm, disk, distro_slug, get_color_palette, get_gpu_name as info_gpu_name,
+    get_gpu_temperature, gpu as info_gpu, kernel, memory, os, os_age, packages, resolution, shell,
+    swap, system_for_fetch, terminal, terminal_font, theme, uptime, user_host,
 };
 use sysinfo::System;
 use ui::image_render;
@@ -44,6 +44,7 @@ fn fetch_module(
     key: &str,
     config: &AppConfig,
     sys: Option<&System>,
+    no_color: bool,
 ) -> Vec<(String, String, String)> {
     let unit = config.general.unit_type.as_str();
     let mut out = Vec::new();
@@ -142,20 +143,27 @@ fn fetch_module(
                 out.push((key.to_string(), "Local IP".into(), v));
             }
         }
+        "palette" => {
+            out.push((key.to_string(), String::new(), get_color_palette(no_color)));
+        }
         _ => {}
     }
     out
 }
 
 /// Collect all lines (key, label, value) following config.layout.
-fn collect_lines(config: &AppConfig, sys: Option<&System>) -> Vec<(String, String, String)> {
+fn collect_lines(
+    config: &AppConfig,
+    sys: Option<&System>,
+    no_color: bool,
+) -> Vec<(String, String, String)> {
     let mut lines = Vec::new();
     for key in &config.layout {
         let key = key.trim();
         if key.is_empty() {
             continue;
         }
-        for (k, label, value) in fetch_module(key, config, sys) {
+        for (k, label, value) in fetch_module(key, config, sys, no_color) {
             lines.push((k, label, value));
         }
     }
@@ -216,7 +224,7 @@ fn main() {
         std::thread::sleep(sysinfo::MINIMUM_CPU_UPDATE_INTERVAL);
         s.refresh_cpu_usage();
     }
-    let lines = collect_lines(&config, sys.as_ref());
+    let lines = collect_lines(&config, sys.as_ref(), args.no_color);
 
     if args.json {
         let map = lines_to_json(&lines, sys.as_ref(), &config);

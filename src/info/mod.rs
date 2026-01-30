@@ -9,6 +9,7 @@ mod memory;
 mod os;
 mod os_age;
 mod packages;
+mod palette;
 mod resolution;
 mod shell;
 mod swap;
@@ -108,6 +109,11 @@ pub fn os_age() -> InfoItem {
 /// Returns one (label, value) per line: Theme, Icons, Font.
 pub fn theme() -> Vec<InfoItem> {
     theme::get_theme_info()
+}
+
+/// ANSI color palette row (8 standard + 8 bright blocks). When no_color, returns plain blocks.
+pub fn get_color_palette(no_color: bool) -> String {
+    palette::get_color_palette(no_color)
 }
 
 /// Builds a System with only memory and CPU (name) refreshed for performance.

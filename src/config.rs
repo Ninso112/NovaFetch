@@ -33,6 +33,7 @@ fn default_layout() -> Vec<String> {
         "theme".into(),
         "media".into(),
         "local_ip".into(),
+        "palette".into(),
     ]
 }
 
