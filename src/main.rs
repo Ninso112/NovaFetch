@@ -170,6 +170,174 @@ fn collect_lines(
     lines
 }
 
+/// Category definitions for tree layout.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Category {
+    Hardware,
+    Software,
+    Status,
+}
+
+impl Category {
+    fn name(&self) -> &str {
+        match self {
+            Category::Hardware => "Hardware",
+            Category::Software => "Software",
+            Category::Status => "Status",
+        }
+    }
+
+    fn header(&self, width: usize) -> String {
+        let name = self.name();
+        let total_dashes = width.saturating_sub(name.len());
+        let left_dashes = total_dashes / 2;
+        let right_dashes = total_dashes - left_dashes;
+        format!(
+            "{}{}{}",
+            "─".repeat(left_dashes),
+            name,
+            "─".repeat(right_dashes)
+        )
+    }
+}
+
+/// Categorize a key into Hardware, Software, or Status.
+fn categorize_key(key: &str) -> Option<Category> {
+    match key {
+        "user_host" | "cpu" | "gpu" | "memory" | "disk" | "resolution" | "swap" => {
+            Some(Category::Hardware)
+        }
+        "os" | "kernel" | "de" | "shell" | "terminal" | "terminal_font" | "packages"
+        | "theme" | "os_age" => Some(Category::Software),
+        "uptime" | "local_ip" | "media" => Some(Category::Status),
+        "palette" => None, // Palette is special, shown at the very end
+        _ => None,
+    }
+}
+
+/// Format a group of items with tree structure.
+/// First item uses no prefix (root), middle items use ├─, last item uses └─.
+fn format_group(
+    items: &[(String, String)],
+    theme: &ThemeManager,
+    tree_color: &str,
+) -> Vec<String> {
+    let mut result = Vec::new();
+    let count = items.len();
+    if count == 0 {
+        return result;
+    }
+
+    for (i, (label, value)) in items.iter().enumerate() {
+        let is_first = i == 0;
+        let is_last = i == count - 1;
+
+        let formatted_value = theme.format_value(value);
+
+        if is_first {
+            // First item: no tree prefix, just the label
+            let formatted_label = theme.format_label("", label);
+            result.push(format!(" {}: {}", formatted_label, formatted_value));
+        } else {
+            let prefix = if is_last { " └─ " } else { " ├─ " };
+            let colored_prefix = format!("{}{}\x1b[0m", tree_color, prefix);
+            let formatted_label = theme.format_label("", label);
+            result.push(format!("{}{}: {}", colored_prefix, formatted_label, formatted_value));
+        }
+    }
+    result
+}
+
+/// Build tree-structured output from categorized lines.
+fn build_tree_output(
+    lines: &[(String, String, String)],
+    theme: &ThemeManager,
+    no_color: bool,
+) -> Vec<String> {
+    let mut result = Vec::new();
+    let tree_color = if no_color {
+        ""
+    } else {
+        "\x1b[38;5;214m" // Orange/Yellow for tree structure
+    };
+
+    // Group lines by category
+    let mut hardware = Vec::new();
+    let mut software = Vec::new();
+    let mut status = Vec::new();
+    let mut palette_line = None;
+
+    for (key, label, value) in lines {
+        if key == "palette" {
+            palette_line = Some(value.clone());
+            continue;
+        }
+        if let Some(cat) = categorize_key(key) {
+            let display_label = if label.is_empty() {
+                // For user_host, use a default label
+                if key == "user_host" {
+                    "Host".to_string()
+                } else {
+                    key.to_string()
+                }
+            } else {
+                label.clone()
+            };
+            match cat {
+                Category::Hardware => hardware.push((display_label, value.clone())),
+                Category::Software => software.push((display_label, value.clone())),
+                Category::Status => status.push((display_label, value.clone())),
+            }
+        }
+    }
+
+    // Format each category
+    let header_width = 24; // Width for category headers
+
+    if !hardware.is_empty() {
+        let header = Category::Hardware.header(header_width);
+        let colored_header = if no_color {
+            header
+        } else {
+            format!("{}{}\x1b[0m", tree_color, header)
+        };
+        result.push(colored_header);
+        result.extend(format_group(&hardware, theme, tree_color));
+        result.push(String::new()); // Empty line between categories
+    }
+
+    if !software.is_empty() {
+        let header = Category::Software.header(header_width);
+        let colored_header = if no_color {
+            header
+        } else {
+            format!("{}{}\x1b[0m", tree_color, header)
+        };
+        result.push(colored_header);
+        result.extend(format_group(&software, theme, tree_color));
+        result.push(String::new());
+    }
+
+    if !status.is_empty() {
+        let header = Category::Status.header(header_width);
+        let colored_header = if no_color {
+            header
+        } else {
+            format!("{}{}\x1b[0m", tree_color, header)
+        };
+        result.push(colored_header);
+        result.extend(format_group(&status, theme, tree_color));
+        result.push(String::new());
+    }
+
+    // Add palette at the very end if present
+    if let Some(palette) = palette_line {
+        result.push(theme.format_value(&palette));
+    }
+
+    result
+}
+
 /// Convert lines to JSON map (for --json).
 fn lines_to_json(
     lines: &[(String, String, String)],
@@ -236,7 +404,6 @@ fn main() {
     }
 
     let theme = ThemeManager::new(&config, args.no_color);
-    let sep = &config.general.separator;
 
     // Optional: image logo
     let use_image = config
@@ -249,29 +416,9 @@ fn main() {
     if let Some(path) = use_image {
         if let Ok(()) = image_render::print_image(path, config.general.image_width) {
             println!();
-            // Align: compute max label width (formatted)
-            let max_label_width = if config.general.align_values && !args.no_color {
-                lines
-                    .iter()
-                    .map(|(k, l, _)| ThemeManager::display_width(&theme.format_label(k, l)))
-                    .max()
-                    .unwrap_or(0)
-            } else {
-                0
-            };
-            for (key, label, value) in &lines {
-                let formatted_label = theme.format_label(key, label);
-                let formatted_value = theme.format_value(value);
-                if label.is_empty() {
-                    println!("{}", formatted_value);
-                } else {
-                    let label_part = if config.general.align_values && max_label_width > 0 {
-                        format!("{}{}", theme.pad_label_and_sep(&formatted_label, max_label_width), sep)
-                    } else {
-                        format!("{}{}", formatted_label, sep)
-                    };
-                    println!("{}{}", label_part, formatted_value);
-                }
+            let info_lines = build_tree_output(&lines, &theme, args.no_color);
+            for line in info_lines {
+                println!("{}", line);
             }
             return;
         }
@@ -309,57 +456,15 @@ fn main() {
             })
             .collect();
 
-        // Build info lines (formatted strings)
-        let max_label_width = if config.general.align_values && !args.no_color {
-            lines
-                .iter()
-                .map(|(k, l, _)| ThemeManager::display_width(&theme.format_label(k, l)))
-                .max()
-                .unwrap_or(0)
-        } else {
-            0
-        };
-        let mut info_lines = Vec::new();
-        for (key, label, value) in &lines {
-            let formatted_label = theme.format_label(key, label);
-            let formatted_value = theme.format_value(value);
-            if label.is_empty() {
-                info_lines.push(formatted_value);
-            } else {
-                let label_part = if config.general.align_values && max_label_width > 0 {
-                    format!("{}{}", theme.pad_label_and_sep(&formatted_label, max_label_width), sep)
-                } else {
-                    format!("{}{}", formatted_label, sep)
-                };
-                info_lines.push(format!("{}{}", label_part, formatted_value));
-            }
-        }
+        // Build tree-structured info lines
+        let info_lines = build_tree_output(&lines, &theme, args.no_color);
 
         ui::print_final_result(&logo_lines, &info_lines, 4);
     } else {
-        // No ASCII: print info lines only
-        let max_label_width = if config.general.align_values && !args.no_color {
-            lines
-                .iter()
-                .map(|(k, l, _)| ThemeManager::display_width(&theme.format_label(k, l)))
-                .max()
-                .unwrap_or(0)
-        } else {
-            0
-        };
-        for (key, label, value) in &lines {
-            let formatted_label = theme.format_label(key, label);
-            let formatted_value = theme.format_value(value);
-            if label.is_empty() {
-                println!("{}", formatted_value);
-            } else {
-                let label_part = if config.general.align_values && max_label_width > 0 {
-                    format!("{}{}", theme.pad_label_and_sep(&formatted_label, max_label_width), sep)
-                } else {
-                    format!("{}{}", formatted_label, sep)
-                };
-                println!("{}{}", label_part, formatted_value);
-            }
+        // No ASCII: print tree-structured info lines only
+        let info_lines = build_tree_output(&lines, &theme, args.no_color);
+        for line in info_lines {
+            println!("{}", line);
         }
     }
 }
