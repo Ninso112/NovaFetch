@@ -3,6 +3,7 @@ mod info;
 mod ui;
 
 use clap::Parser;
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 use config::Config;
@@ -28,16 +29,18 @@ struct Args {
     /// Path to config file (default: ~/.config/novafetch/config.toml)
     #[arg(long, value_name = "PATH")]
     config: Option<PathBuf>,
+
+    /// Output system info as JSON (skips ASCII art and rendering)
+    #[arg(long)]
+    json: bool,
 }
 
-fn main() {
-    let args = Args::parse();
-    let config = Config::load(args.config.as_deref());
-
+/// Data collection phase: gather all enabled system info into a list of (label, value).
+fn collect_system_info(config: &Config) -> Vec<InfoItem> {
     let need_sys = config.memory.enabled || config.cpu.enabled;
     let sys = need_sys.then(system_for_fetch);
 
-    let mut stats: Vec<InfoItem> = Vec::with_capacity(16);
+    let mut stats: Vec<InfoItem> = Vec::with_capacity(20);
 
     if config.user_host.enabled {
         let (_, value) = user_host();
@@ -97,6 +100,33 @@ fn main() {
         stats.push((config.packages.label.clone(), value));
     }
 
+    stats
+}
+
+/// Convert collected stats to a JSON-serializable map. Empty label becomes "user_host".
+fn stats_to_json_map(stats: Vec<InfoItem>) -> HashMap<String, String> {
+    stats
+        .into_iter()
+        .map(|(k, v)| (if k.is_empty() { "user_host".to_string() } else { k }, v))
+        .collect()
+}
+
+fn main() {
+    let args = Args::parse();
+    let config = Config::load(args.config.as_deref());
+
+    let stats = collect_system_info(&config);
+
+    if args.json {
+        let map = stats_to_json_map(stats);
+        match serde_json::to_string_pretty(&map) {
+            Ok(s) => println!("{}", s),
+            Err(e) => eprintln!("json error: {}", e),
+        }
+        return;
+    }
+
+    // Rendering phase: logo + side-by-side UI
     let slug: String = args.logo.clone().unwrap_or_else(distro_slug);
     let slug = slug.trim();
     let slug = if slug.is_empty() { "fallback" } else { slug };
