@@ -159,6 +159,31 @@ const MACOS_ASCII: &str = r#"
        "cooc*"    "*coo'"
 "#;
 
+// --- Kali Linux (concise) ---
+const KALI_ASCII: &str = r#"
+  .;dk0KXXK0kd;.
+ .x0KXXXXXXXXXK0x.
+ .0XXXXXXXXXXXXX0.
+ kXKx;.......;xKXk
+ KX.  .;oo;.  .XK
+ kX  .xXXXXx.  Xk
+  Xk  ;xxxx;  kX
+   Xk.      .kX
+    XKxxxxxKX
+"#;
+
+// --- Gentoo (stylized g, concise) ---
+const GENTOO_ASCII: &str = r#"
+   _____
+  /  __ \
+ |  /  \/
+ |  \__/\
+ |  /  \/
+  \ \__/\
+   \____/
+   _/  \_
+"#;
+
 // --- Fallback (Tux-style, simple) ---
 const FALLBACK_ASCII: &str = r#"
    .---.
@@ -198,6 +223,12 @@ fn windows11_lines() -> Vec<&'static str> {
 fn macos_lines() -> Vec<&'static str> {
     lines_from_raw(MACOS_ASCII)
 }
+fn kali_lines() -> Vec<&'static str> {
+    lines_from_raw(KALI_ASCII)
+}
+fn gentoo_lines() -> Vec<&'static str> {
+    lines_from_raw(GENTOO_ASCII)
+}
 fn fallback_lines() -> Vec<&'static str> {
     lines_from_raw(FALLBACK_ASCII)
 }
@@ -208,6 +239,7 @@ pub fn normalize_slug(s: &str) -> String {
 }
 
 /// Returns ASCII art lines and primary color for the given distro slug.
+/// windows -> Windows 11 style (Blue); macos/darwin -> Apple (White/Silver).
 /// Unknown slugs return the fallback (Tux-style) logo with default color.
 pub fn get_logo(slug: &str) -> (Vec<&'static str>, Color) {
     let slug = normalize_slug(slug);
@@ -217,8 +249,10 @@ pub fn get_logo(slug: &str) -> (Vec<&'static str>, Color) {
         "ubuntu" => (ubuntu_lines(), Color::Red),
         "fedora" => (fedora_lines(), Color::Blue),
         "linuxmint" | "mint" => (mint_lines(), Color::Green),
-        "windows10" | "windows8" | "windows" => (windows10_lines(), Color::BrightBlue),
-        "windows11" => (windows11_lines(), Color::BrightBlue),
+        "kali" | "kalilinux" => (kali_lines(), Color::Blue),
+        "gentoo" => (gentoo_lines(), Color::Magenta),
+        "windows10" | "windows8" => (windows10_lines(), Color::BrightBlue),
+        "windows11" | "windows" => (windows11_lines(), Color::BrightBlue),
         "macos" | "darwin" | "apple" | "mac" => (macos_lines(), Color::BrightWhite),
         _ => (fallback_lines(), Color::Cyan),
     };
@@ -234,6 +268,8 @@ pub fn supported_slugs() -> &'static [&'static str] {
         "ubuntu",
         "fedora",
         "mint",
+        "kali",
+        "gentoo",
         "windows",
         "windows10",
         "windows11",
