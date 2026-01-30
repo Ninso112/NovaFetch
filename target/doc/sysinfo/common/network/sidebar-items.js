@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["IpNetworkFromStrError","MacAddrFromStrError"],"struct":["IpNetwork","MacAddr","NetworkData","Networks"]};

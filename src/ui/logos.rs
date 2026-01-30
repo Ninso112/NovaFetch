@@ -1,236 +1,12 @@
 //! Distro-specific ASCII art and primary colors.
-//! Art extracted from Neofetch (https://github.com/dylanaraps/neofetch), Bash variables removed.
+//! Data lives in ascii_data.rs; this module handles matching and colors.
 
 use colored::Color;
 
-// --- Arch Linux (neofetch arch_small) ---
-const ARCH_ASCII: &str = r#"
-      /\
-     /  \
-    /\   \
-   /      \
-  /   ,,   \
- /   |  |  -\
-/_-''    ''-_\
-"#;
-
-// --- Debian (neofetch Debian full logo) ---
-const DEBIAN_ASCII: &str = r#"
-       _,met$$$$$gg.
-    ,g$$$$$$$$$$$$$$$P.
-  ,g$$P"        """Y$$.".
- ,$$P'              `$$$.
-',$$P       ,ggs.     `$$b:
-`d$$'     ,$P"'   .    $$$
- $$P      d$'     ,    $$P
- $$:      $$.   -    ,d$$'
- $$;      Y$b._   _,d$P'
- Y$$.    `.`"Y$$$$P"'
- `$$b      "-.__
-  `Y$$
-   `Y$$.
-     `$$b.
-       `Y$$b.
-          `"Y$b._
-              `"""
-"#;
-
-// --- Ubuntu (neofetch Ubuntu) ---
-const UBUNTU_ASCII: &str = r#"
-            .-/+oossssoo+-.
-        ´:+ssssssssssssssssss+:`
-      -+ssssssssssssssssssyyssss+-
-    .ossssssssssssssssssdMMMNysssso.
-   /ssssssssssshdmmNNmmyNMMMMhssssss\
-  +ssssssssshmydMMMMMMMNddddyssssssss+
- /sssssssshNMMMyhhyyyhmNMMMNhssssssss\
-.ssssssssdMMMNhsssssssssshNMMMdssssssss.
-+sssshhhyNMMNyssssssssssssyNMMMysssssss+
-ossyNMMMNyMMhsssssssssssssshmmmhssssssso
-ossyNMMMNyMMhsssssssssssssshmmmhssssssso
-+sssshhhyNMMNyssssssssssssyNMMMysssssss+
-.ssssssssdMMMNhsssssssssshNMMMdssssssss.
- \sssssssshNMMMyhhyyyhdNMMMNhssssssss/
-  +sssssssssdmydMMMMMMMMddddyssssssss+
-   \ssssssssssshdmNNNNmyNMMMMhssssss/
-    .ossssssssssssssssssdMMMNysssso.
-      -+sssssssssssssssssyyyssss+-
-        `:+ssssssssssssssssss+:`
-            .-\+oossssoo+/-.
-"#;
-
-// --- Fedora (neofetch Fedora) ---
-const FEDORA_ASCII: &str = r#"
-             .',;::::;,'.
-         .';:cccccccccccc:;,.
-      .;cccccccccccccccccccccc;.
-    .:cccccccccccccccccccccccccc:.
-  .;ccccccccccccc;.:dddl:.;ccccccc;.
- .:ccccccccccccc;OWMKOOXMWd;ccccccc:.
-.:ccccccccccccc;KMMc;cc;xMMc;ccccccc:.
-,cccccccccccccc;MMM.;cc;;WW:;cccccccc,
-:cccccccccccccc;MMM.;cccccccccccccc:
-:ccccccc;oxOOOo;MMM0OOk.;cccccccccccc:
-cccccc;0MMKxdd:;MMMkddc.;cccccccccccc;
-ccccc;XM0';cccc;MMM.;cccccccccccccccc'
-ccccc;MMo;ccccc;MMW.;ccccccccccccccc;
-ccccc;0MNc.ccc.xMMd;ccccccccccccccc;
-cccccc;dNMWXXXWM0:;cccccccccccccc:,
-cccccccc;.:odl:.;cccccccccccccc:,.
-:cccccccccccccccccccccccccccc:'.
-.:cccccccccccccccccccccc:;,..
-  '::cccccccccccccc::;,.
-"#;
-
-// --- Linux Mint (neofetch LinuxMint) ---
-const MINT_ASCII: &str = r#"
-  \_____/
-   \   /
-    \ /
-   _/ \_
-  (     )
-   \___/
-  (     )
- (       )
-"#;
-
-// --- Windows 10 (neofetch Windows 10) ---
-const WINDOWS10_ASCII: &str = r#"
-                                ..,
-                    ....,,:;+ccllll
-      ...,,+:;  cllllllllllllllllll
-,cclllllllllll  lllllllllllllllllll
-llllllllllllll  lllllllllllllllllll
-llllllllllllll  lllllllllllllllllll
-llllllllllllll  lllllllllllllllllll
-llllllllllllll  lllllllllllllllllll
-llllllllllllll  lllllllllllllllllll
-llllllllllllll  lllllllllllllllllll
-
-llllllllllllll  lllllllllllllllllll
-llllllllllllll  lllllllllllllllllll
-llllllllllllll  lllllllllllllllllll
-llllllllllllll  lllllllllllllllllll
-llllllllllllll  lllllllllllllllllll
-`'ccllllllllll  lllllllllllllllllll
-       `' \*::  :ccllllllllllllllll
-                       ````''*::cll
-                                 ``
-"#;
-
-// --- Windows 11 (neofetch Windows 11) ---
-const WINDOWS11_ASCII: &str = r#"
-
-################  ################
-################  ################
-################  ################
-################  ################
-################  ################
-################  ################
-################  ################
-
-################  ################
-################  ################
-################  ################
-################  ################
-################  ################
-################  ################
-################  ################
-"#;
-
-// --- macOS / Darwin (neofetch mac/Darwin) ---
-const MACOS_ASCII: &str = r#"
-                    c.'
-                 ,xNMM.
-               .OMMMMo
-               lMM"
-     .;loddo:.  .olloddol;.
-   cKMMMMMMMMMMNWMMMMMMMMMM0:
- .KMMMMMMMMMMMMMMMMMMMMMMMWd.
- XMMMMMMMMMMMMMMMMMMMMMMMX.
-;MMMMMMMMMMMMMMMMMMMMMMMM:
-:MMMMMMMMMMMMMMMMMMMMMMMM:
-.MMMMMMMMMMMMMMMMMMMMMMMMMX.
- kMMMMMMMMMMMMMMMMMMMMMMMMWd.
- 'XMMMMMMMMMMMMMMMMMMMMMMMMMMk
-  'XMMMMMMMMMMMMMMMMMMMMMMMMK.
-    kMMMMMMMMMMMMMMMMMMMMMMd
-     ;KMMMMMMMWXXWMMMMMMMk.
-       "cooc*"    "*coo'"
-"#;
-
-// --- Kali Linux (concise) ---
-const KALI_ASCII: &str = r#"
-  .;dk0KXXK0kd;.
- .x0KXXXXXXXXXK0x.
- .0XXXXXXXXXXXXX0.
- kXKx;.......;xKXk
- KX.  .;oo;.  .XK
- kX  .xXXXXx.  Xk
-  Xk  ;xxxx;  kX
-   Xk.      .kX
-    XKxxxxxKX
-"#;
-
-// --- Gentoo (stylized g, concise) ---
-const GENTOO_ASCII: &str = r#"
-   _____
-  /  __ \
- |  /  \/
- |  \__/\
- |  /  \/
-  \ \__/\
-   \____/
-   _/  \_
-"#;
-
-// --- Fallback (Tux-style, simple) ---
-const FALLBACK_ASCII: &str = r#"
-   .---.
-  /     \
- | .   . |
-  \  ~  /
-   \_/
-  (   )
-   ( )
-"#;
+use super::ascii_data;
 
 fn lines_from_raw(raw: &'static str) -> Vec<&'static str> {
     raw.trim_matches('\n').split('\n').collect()
-}
-
-fn arch_lines() -> Vec<&'static str> {
-    lines_from_raw(ARCH_ASCII)
-}
-fn debian_lines() -> Vec<&'static str> {
-    lines_from_raw(DEBIAN_ASCII)
-}
-fn ubuntu_lines() -> Vec<&'static str> {
-    lines_from_raw(UBUNTU_ASCII)
-}
-fn fedora_lines() -> Vec<&'static str> {
-    lines_from_raw(FEDORA_ASCII)
-}
-fn mint_lines() -> Vec<&'static str> {
-    lines_from_raw(MINT_ASCII)
-}
-fn windows10_lines() -> Vec<&'static str> {
-    lines_from_raw(WINDOWS10_ASCII)
-}
-fn windows11_lines() -> Vec<&'static str> {
-    lines_from_raw(WINDOWS11_ASCII)
-}
-fn macos_lines() -> Vec<&'static str> {
-    lines_from_raw(MACOS_ASCII)
-}
-fn kali_lines() -> Vec<&'static str> {
-    lines_from_raw(KALI_ASCII)
-}
-fn gentoo_lines() -> Vec<&'static str> {
-    lines_from_raw(GENTOO_ASCII)
-}
-fn fallback_lines() -> Vec<&'static str> {
-    lines_from_raw(FALLBACK_ASCII)
 }
 
 /// Normalize a distro slug for lookup: lowercase, no spaces.
@@ -239,24 +15,89 @@ pub fn normalize_slug(s: &str) -> String {
 }
 
 /// Returns ASCII art lines and primary color for the given distro slug.
-/// windows -> Windows 11 style (Blue); macos/darwin -> Apple (White/Silver).
-/// Unknown slugs return the fallback (Tux-style) logo with default color.
+/// Uses family fallback (e.g. "kubuntu" -> Ubuntu) and finally Tux fallback.
 pub fn get_logo(slug: &str) -> (Vec<&'static str>, Color) {
     let slug = normalize_slug(slug);
-    let (lines, color) = match slug.as_str() {
-        "arch" | "archlinux" => (arch_lines(), Color::Cyan),
-        "debian" => (debian_lines(), Color::Red),
-        "ubuntu" => (ubuntu_lines(), Color::Red),
-        "fedora" => (fedora_lines(), Color::Blue),
-        "linuxmint" | "mint" => (mint_lines(), Color::Green),
-        "kali" | "kalilinux" => (kali_lines(), Color::Blue),
-        "gentoo" => (gentoo_lines(), Color::Magenta),
-        "windows10" | "windows8" => (windows10_lines(), Color::BrightBlue),
-        "windows11" | "windows" => (windows11_lines(), Color::BrightBlue),
-        "macos" | "darwin" | "apple" | "mac" => (macos_lines(), Color::BrightWhite),
-        _ => (fallback_lines(), Color::Cyan),
+
+    // Direct match: slug -> (art constant, color)
+    let (raw, color) = match slug.as_str() {
+        // Major families
+        "arch" | "archlinux" => (ascii_data::ARCH, Color::Cyan),
+        "debian" => (ascii_data::DEBIAN, Color::Red),
+        "ubuntu" => (ascii_data::UBUNTU, Color::BrightRed),
+        "fedora" => (ascii_data::FEDORA, Color::Blue),
+        "opensuse" | "suse" | "sles" => (ascii_data::OPENSUSE, Color::Green),
+        "gentoo" => (ascii_data::GENTOO, Color::Magenta),
+        "slackware" => (ascii_data::SLACKWARE, Color::Blue),
+        "rhel" | "redhat" => (ascii_data::RHEL, Color::Red),
+        // Top derivatives
+        "linuxmint" | "mint" => (ascii_data::MINT, Color::Green),
+        "manjaro" => (ascii_data::MANJARO, Color::Green),
+        "endeavouros" | "endeavour" => (ascii_data::ENDEAVOUROS, Color::Magenta),
+        "popos" | "pop_os" | "pop!_os" => (ascii_data::POP_OS, Color::Cyan),
+        "mxlinux" | "mx" => (ascii_data::MX_LINUX, Color::Green),
+        "zorinos" | "zorin" => (ascii_data::ZORIN, Color::Blue),
+        "elementary" | "elementaryos" => (ascii_data::ELEMENTARY, Color::Blue),
+        "kali" | "kalilinux" => (ascii_data::KALI, Color::Blue),
+        "parrot" | "parrotos" => (ascii_data::PARROT, Color::BrightWhite),
+        "garuda" | "garudalinux" => (ascii_data::GARUDA, Color::Cyan),
+        "nobara" | "nobaralinux" => (ascii_data::NOBARA, Color::Green),
+        // Server / Enterprise
+        "almalinux" | "alma" => (ascii_data::ALMALINUX, Color::Red),
+        "rocky" | "rockylinux" => (ascii_data::ROCKY, Color::Blue),
+        "centos" => (ascii_data::CENTOS, Color::Blue),
+        "alpine" => (ascii_data::ALPINE, Color::Blue),
+        "oraclelinux" | "oracle" => (ascii_data::ORACLE_LINUX, Color::Red),
+        // Others
+        "nixos" | "nix" => (ascii_data::NIXOS, Color::Cyan),
+        "void" | "voidlinux" => (ascii_data::VOID, Color::Green),
+        "solus" => (ascii_data::SOLUS, Color::Blue),
+        "puppy" | "puppylinux" => (ascii_data::PUPPY, Color::BrightYellow),
+        "freebsd" | "bsd" => (ascii_data::FREEBSD, Color::Red),
+        "raspbian" | "raspberrypi" | "raspi" => (ascii_data::RASPBIAN, Color::Red),
+        // Windows / macOS
+        "windows10" | "windows8" | "windows7" => (ascii_data::WINDOWS10, Color::BrightBlue),
+        "windows11" | "windows" => (ascii_data::WINDOWS11, Color::BrightBlue),
+        "macos" | "darwin" | "apple" | "mac" => (ascii_data::MACOS, Color::BrightWhite),
+        "fallback" => (ascii_data::FALLBACK, Color::Cyan),
+        _ => {
+            // Family fallback: slug contains family name -> use that logo
+            let slug_lower = slug.as_str();
+            if slug_lower.contains("arch") {
+                (ascii_data::ARCH, Color::Cyan)
+            } else if slug_lower.contains("debian") {
+                (ascii_data::DEBIAN, Color::Red)
+            } else if slug_lower.contains("ubuntu") || slug_lower.contains("kubuntu") || slug_lower.contains("xubuntu") || slug_lower.contains("lubuntu") {
+                (ascii_data::UBUNTU, Color::BrightRed)
+            } else if slug_lower.contains("fedora") || slug_lower.contains("rhel") || slug_lower.contains("redhat") {
+                (ascii_data::FEDORA, Color::Blue)
+            } else if slug_lower.contains("suse") || slug_lower.contains("sles") {
+                (ascii_data::OPENSUSE, Color::Green)
+            } else if slug_lower.contains("gentoo") {
+                (ascii_data::GENTOO, Color::Magenta)
+            } else if slug_lower.contains("mint") {
+                (ascii_data::MINT, Color::Green)
+            } else if slug_lower.contains("manjaro") {
+                (ascii_data::MANJARO, Color::Green)
+            } else if slug_lower.contains("centos") || slug_lower.contains("rocky") || slug_lower.contains("alma") {
+                (ascii_data::RHEL, Color::Blue)
+            } else if slug_lower.contains("alpine") {
+                (ascii_data::ALPINE, Color::Blue)
+            } else if slug_lower.contains("kali") {
+                (ascii_data::KALI, Color::Blue)
+            } else if slug_lower.contains("nix") {
+                (ascii_data::NIXOS, Color::Cyan)
+            } else if slug_lower.contains("void") {
+                (ascii_data::VOID, Color::Green)
+            } else if slug_lower.contains("freebsd") || slug_lower.contains("bsd") {
+                (ascii_data::FREEBSD, Color::Red)
+            } else {
+                (ascii_data::FALLBACK, Color::Cyan)
+            }
+        }
     };
-    (lines, color)
+
+    (lines_from_raw(raw), color)
 }
 
 /// List of supported distro slug names for help/CLI.
@@ -267,11 +108,33 @@ pub fn supported_slugs() -> &'static [&'static str] {
         "debian",
         "ubuntu",
         "fedora",
-        "mint",
-        "kali",
+        "opensuse",
         "gentoo",
+        "slackware",
+        "rhel",
+        "mint",
+        "manjaro",
+        "endeavouros",
+        "pop_os",
+        "mx",
+        "zorin",
+        "elementary",
+        "kali",
+        "parrot",
+        "garuda",
+        "nobara",
+        "almalinux",
+        "rocky",
+        "centos",
+        "alpine",
+        "oracle",
+        "nixos",
+        "void",
+        "solus",
+        "puppy",
+        "freebsd",
+        "raspbian",
         "windows",
-        "windows10",
         "windows11",
         "macos",
         "fallback",

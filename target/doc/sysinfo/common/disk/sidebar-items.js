@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["DiskKind"],"struct":["Disk","DiskRefreshKind","Disks"]};

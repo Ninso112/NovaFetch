@@ -11,8 +11,9 @@ use info::{
     cpu, de_wm, disk, distro_slug, gpu, kernel, memory, os, os_age, packages, resolution, shell,
     swap, system_for_fetch, terminal, terminal_font, uptime, user_host, InfoItem,
 };
+use ui::image_render;
 use ui::logos;
-use ui::{render, RenderOptions, SEPARATOR};
+use ui::{render, render_info_only, RenderOptions, SEPARATOR};
 
 use sysinfo::System;
 
@@ -176,21 +177,55 @@ fn main() {
         return;
     }
 
-    // Rendering phase: logo + side-by-side UI
-    let slug: String = args.logo.clone().unwrap_or_else(distro_slug);
-    let slug = slug.trim();
-    let slug = if slug.is_empty() { "fallback" } else { slug };
-    let (logo_lines_vec, primary_color) = logos::get_logo(&slug);
-    let logo_lines: &[&str] = logo_lines_vec.as_slice();
-
-    render(RenderOptions {
-        logo_lines,
+    // Rendering phase: image logo or ASCII logo + info
+    let opts = RenderOptions {
+        logo_lines: &[],
         stats: &stats,
-        primary_color: Some(primary_color),
+        primary_color: None,
         ascii_color: &config.colors.ascii,
         key_color: &config.colors.key,
         value_color: &config.colors.value,
         no_color: args.no_color,
         separator: SEPARATOR,
-    });
+    };
+
+    let use_image = config
+        .image_path
+        .as_ref()
+        .map(|p| p.trim())
+        .filter(|p| !p.is_empty());
+
+    if let Some(path) = use_image {
+        match image_render::print_image(path, config.image_width) {
+            Ok(()) => {
+                println!();
+                render_info_only(&opts);
+            }
+            Err(e) => {
+                eprintln!("novafetch: image '{}': {} (using ASCII logo)", path, e);
+                // Fallback: ASCII logo side-by-side
+                let slug: String = args.logo.clone().unwrap_or_else(distro_slug);
+                let slug = slug.trim();
+                let slug = if slug.is_empty() { "fallback" } else { slug };
+                let (logo_lines_vec, primary_color) = logos::get_logo(&slug);
+                let logo_lines: &[&str] = logo_lines_vec.as_slice();
+                render(RenderOptions {
+                    logo_lines,
+                    primary_color: Some(primary_color),
+                    ..opts
+                });
+            }
+        }
+    } else {
+        let slug: String = args.logo.clone().unwrap_or_else(distro_slug);
+        let slug = slug.trim();
+        let slug = if slug.is_empty() { "fallback" } else { slug };
+        let (logo_lines_vec, primary_color) = logos::get_logo(&slug);
+        let logo_lines: &[&str] = logo_lines_vec.as_slice();
+        render(RenderOptions {
+            logo_lines,
+            primary_color: Some(primary_color),
+            ..opts
+        });
+    }
 }

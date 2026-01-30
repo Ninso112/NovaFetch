@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["endswith","get_group_name","get_user_groups","get_users"],"struct":["UserInner"]};

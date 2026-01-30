@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["get_interface_address","get_interface_ip_networks","ip_mask_to_prefix","ipv4_mask_to_prefix","ipv6_mask_to_prefix","parse_interface_address","sockaddr_to_addr","sockaddr_to_network_addr"],"struct":["InterfaceAddressIterator"],"type":["InAddrType"]};
