@@ -15,6 +15,7 @@ mod terminal;
 mod terminal_font;
 mod uptime;
 mod user_host;
+mod utils;
 
 pub use bar::bar;
 use sysinfo::{CpuRefreshKind, MemoryRefreshKind, RefreshKind, System};
@@ -60,12 +61,12 @@ pub fn gpu() -> InfoItem {
     ("GPU".into(), gpu_name)
 }
 
-pub fn memory(sys: &System, show_bar: bool) -> InfoItem {
-    memory::get(sys, show_bar)
+pub fn memory(sys: &System, show_bar: bool, unit_type: &str) -> InfoItem {
+    memory::get(sys, show_bar, unit_type)
 }
 
-pub fn disk(show_bar: bool, label_prefix: &str) -> Vec<InfoItem> {
-    disk::get(show_bar, label_prefix)
+pub fn disk(show_bar: bool, label_prefix: &str, unit_type: &str) -> Vec<InfoItem> {
+    disk::get(show_bar, label_prefix, unit_type)
 }
 
 pub fn terminal() -> InfoItem {
@@ -84,8 +85,8 @@ pub fn resolution() -> InfoItem {
     resolution::get()
 }
 
-pub fn swap(sys: &System) -> InfoItem {
-    swap::get(sys)
+pub fn swap(sys: &System, unit_type: &str) -> InfoItem {
+    swap::get(sys, unit_type)
 }
 
 pub fn os_age() -> InfoItem {

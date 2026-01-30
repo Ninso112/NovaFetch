@@ -5,11 +5,13 @@ use std::ffi::OsStr;
 use std::path::Path;
 use sysinfo::{DiskKind, DiskRefreshKind, Disks};
 
-use crate::info::bar;
+use super::utils;
 use super::InfoItem;
+use crate::info::bar;
 
 /// Returns one (label, value) per relevant disk. Label uses `label_prefix` e.g. "Disk (/)", "Disk (/home)".
-pub fn get(show_bar: bool, label_prefix: &str) -> Vec<InfoItem> {
+/// `unit_type` controls byte display: "standard" (KB/MB/GB), "iec" (KiB/MiB/GiB), "si" (1000-based).
+pub fn get(show_bar: bool, label_prefix: &str, unit_type: &str) -> Vec<InfoItem> {
     let disks = Disks::new_with_refreshed_list_specifics(
         DiskRefreshKind::nothing().with_kind().with_storage(),
     );
@@ -22,8 +24,8 @@ pub fn get(show_bar: bool, label_prefix: &str) -> Vec<InfoItem> {
         let total = d.total_space();
         let avail = d.available_space();
         let used = total.saturating_sub(avail);
-        let total_mib = total / (1024 * 1024);
-        let used_mib = used / (1024 * 1024);
+        let used_str = utils::format_bytes(used, unit_type);
+        let total_str = utils::format_bytes(total, unit_type);
         let pct = if total > 0 {
             (used as f64 / total as f64 * 100.0).round() as u32
         } else {
@@ -41,9 +43,9 @@ pub fn get(show_bar: bool, label_prefix: &str) -> Vec<InfoItem> {
             String::new()
         };
         let value = if bar_str.is_empty() {
-            format!("{}% ({} MiB / {} MiB)", pct, used_mib, total_mib)
+            format!("{}% ({} / {})", pct, used_str, total_str)
         } else {
-            format!("{}% ({} MiB / {} MiB) [{}]", pct, used_mib, total_mib, bar_str)
+            format!("{}% ({} / {}) [{}]", pct, used_str, total_str, bar_str)
         };
         let mount_display = mount_display_string(d.mount_point());
         let label = if label_prefix.is_empty() {

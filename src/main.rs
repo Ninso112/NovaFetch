@@ -14,6 +14,8 @@ use info::{
 use ui::logos;
 use ui::{render, RenderOptions, SEPARATOR};
 
+use sysinfo::System;
+
 #[derive(Parser, Debug)]
 #[command(name = "novafetch")]
 #[command(about = "A fast, configurable system fetch tool")]
@@ -36,10 +38,9 @@ struct Args {
 }
 
 /// Data collection phase: gather all enabled system info into a list of (label, value).
-fn collect_system_info(config: &Config) -> Vec<InfoItem> {
-    let need_sys = config.memory.enabled || config.cpu.enabled || config.swap.enabled;
-    let sys = need_sys.then(system_for_fetch);
-
+/// `sys` is used for memory, cpu, swap when enabled.
+fn collect_system_info(config: &Config, sys: Option<&System>) -> Vec<InfoItem> {
+    let unit = config.unit_type.as_str();
     let mut stats: Vec<InfoItem> = Vec::with_capacity(20);
 
     if config.user_host.enabled {
@@ -78,12 +79,12 @@ fn collect_system_info(config: &Config) -> Vec<InfoItem> {
     }
     if config.memory.enabled {
         if let Some(ref s) = sys {
-            let (_, value) = memory(s, config.show_memory_bar);
+            let (_, value) = memory(s, config.show_memory_bar, unit);
             stats.push((config.memory.label.clone(), value));
         }
     }
     if config.disk.enabled {
-        for item in disk(config.show_disk_bar, &config.disk.label) {
+        for item in disk(config.show_disk_bar, &config.disk.label, unit) {
             stats.push(item);
         }
     }
@@ -105,7 +106,7 @@ fn collect_system_info(config: &Config) -> Vec<InfoItem> {
     }
     if config.swap.enabled {
         if let Some(ref s) = sys {
-            let (_, value) = swap(s);
+            let (_, value) = swap(s, unit);
             stats.push((config.swap.label.clone(), value));
         }
     }
@@ -117,22 +118,57 @@ fn collect_system_info(config: &Config) -> Vec<InfoItem> {
     stats
 }
 
-/// Convert collected stats to a JSON-serializable map. Empty label becomes "user_host".
-fn stats_to_json_map(stats: Vec<InfoItem>) -> HashMap<String, String> {
-    stats
+/// Convert collected stats to a JSON map. Uses serde_json::Value so we can add raw byte integers.
+/// Empty label becomes "user_host". When sys is present, adds memory_*_bytes and swap_*_bytes for scripting.
+fn stats_to_json_map(
+    stats: Vec<InfoItem>,
+    sys: Option<&System>,
+    config: &Config,
+) -> HashMap<String, serde_json::Value> {
+    let mut map: HashMap<String, serde_json::Value> = stats
         .into_iter()
-        .map(|(k, v)| (if k.is_empty() { "user_host".to_string() } else { k }, v))
-        .collect()
+        .map(|(k, v)| {
+            let key = if k.is_empty() { "user_host".to_string() } else { k };
+            (key, serde_json::Value::String(v))
+        })
+        .collect();
+
+    if let Some(s) = sys {
+        if config.memory.enabled {
+            map.insert(
+                "memory_used_bytes".to_string(),
+                serde_json::Value::Number(serde_json::Number::from(s.used_memory())),
+            );
+            map.insert(
+                "memory_total_bytes".to_string(),
+                serde_json::Value::Number(serde_json::Number::from(s.total_memory())),
+            );
+        }
+        if config.swap.enabled {
+            map.insert(
+                "swap_used_bytes".to_string(),
+                serde_json::Value::Number(serde_json::Number::from(s.used_swap())),
+            );
+            map.insert(
+                "swap_total_bytes".to_string(),
+                serde_json::Value::Number(serde_json::Number::from(s.total_swap())),
+            );
+        }
+    }
+
+    map
 }
 
 fn main() {
     let args = Args::parse();
     let config = Config::load(args.config.as_deref());
 
-    let stats = collect_system_info(&config);
+    let need_sys = config.memory.enabled || config.cpu.enabled || config.swap.enabled;
+    let sys = need_sys.then(system_for_fetch);
+    let stats = collect_system_info(&config, sys.as_ref());
 
     if args.json {
-        let map = stats_to_json_map(stats);
+        let map = stats_to_json_map(stats, sys.as_ref(), &config);
         match serde_json::to_string_pretty(&map) {
             Ok(s) => println!("{}", s),
             Err(e) => eprintln!("json error: {}", e),
