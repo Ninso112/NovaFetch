@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["Group","GroupInner","Groups","User","Users"]};

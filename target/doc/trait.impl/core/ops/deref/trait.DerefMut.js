@@ -1,0 +1,9 @@
+(function() {
+    var implementors = Object.fromEntries([["sysinfo",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.92.0/core/ops/deref/trait.DerefMut.html\" title=\"trait core::ops::deref::DerefMut\">DerefMut</a> for <a class=\"struct\" href=\"sysinfo/struct.Components.html\" title=\"struct sysinfo::Components\">Components</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.92.0/core/ops/deref/trait.DerefMut.html\" title=\"trait core::ops::deref::DerefMut\">DerefMut</a> for <a class=\"struct\" href=\"sysinfo/struct.Disks.html\" title=\"struct sysinfo::Disks\">Disks</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.92.0/core/ops/deref/trait.DerefMut.html\" title=\"trait core::ops::deref::DerefMut\">DerefMut</a> for <a class=\"struct\" href=\"sysinfo/struct.Groups.html\" title=\"struct sysinfo::Groups\">Groups</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.92.0/core/ops/deref/trait.DerefMut.html\" title=\"trait core::ops::deref::DerefMut\">DerefMut</a> for <a class=\"struct\" href=\"sysinfo/struct.Users.html\" title=\"struct sysinfo::Users\">Users</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.92.0/core/ops/deref/trait.DerefMut.html\" title=\"trait core::ops::deref::DerefMut\">DerefMut</a> for <a class=\"struct\" href=\"sysinfo/unix/linux/process/struct.FileCounter.html\" title=\"struct sysinfo::unix::linux::process::FileCounter\">FileCounter</a>"]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":57,"fragment_lengths":[1400]}

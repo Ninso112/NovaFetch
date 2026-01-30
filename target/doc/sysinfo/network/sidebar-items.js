@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["refresh_networks_addresses"]};

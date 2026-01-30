@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["cstr_to_rust","cstr_to_rust_with_size","realpath","wait_process"]};

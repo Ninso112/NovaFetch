@@ -1,0 +1,16 @@
+# NovaFetch configuration
+# Copy to ~/.config/novafetch/config.toml to use
+
+# Toggle which info modules are shown
+show_user_host = true
+show_os = true
+show_kernel = true
+show_uptime = true
+show_shell = true
+show_memory = true
+
+# Custom colors (e.g. cyan, yellow, white, blue, bright_blue, green, red, magenta)
+[colors]
+ascii = "cyan"
+key = "yellow"
+value = "white"

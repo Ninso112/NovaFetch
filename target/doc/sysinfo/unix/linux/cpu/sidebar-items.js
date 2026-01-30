@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["cpuinfo_is_key","get_arm_implementer","get_arm_part","get_cpu_frequency","get_physical_core_count","get_vendor_id_and_brand","get_vendor_id_and_brand_inner"],"macro":["to_str"],"struct":["CpuInner","CpuUsage","CpuValues","CpusWrapper"]};

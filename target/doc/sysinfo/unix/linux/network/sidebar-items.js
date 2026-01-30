@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["read","refresh_networks_list_from_sysfs"],"macro":["old_and_new"],"struct":["NetworkDataInner","NetworksInner"]};
