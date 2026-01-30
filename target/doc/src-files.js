@@ -1,2 +1,0 @@
-createSrcSidebar('[["sysinfo",["",[["common",[],["component.rs","disk.rs","impl_get_set.rs","mod.rs","network.rs","system.rs","user.rs"]],["unix",[["linux",[],["component.rs","cpu.rs","disk.rs","mod.rs","motherboard.rs","network.rs","process.rs","product.rs","system.rs","utils.rs"]]],["groups.rs","mod.rs","network_helper.rs","users.rs","utils.rs"]]],["debug.rs","lib.rs","macros.rs","network.rs","utils.rs"]]]]');
-//{"start":19,"fragment_lengths":[392]}

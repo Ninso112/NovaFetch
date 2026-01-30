@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["get_all_data_from_file","get_all_utf8_data","get_all_utf8_data_from_file","to_cpath","to_u64"],"struct":["PathHandler"],"trait":["PathPush"]};

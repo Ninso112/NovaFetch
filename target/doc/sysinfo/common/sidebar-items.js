@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"macro":["gid","uid","xid"],"mod":["component","disk","impl_get_set","network","system","user"],"struct":["DiskUsage","Gid","Uid"]};
