@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["MINIMUM_CPU_UPDATE_INTERVAL","SUPPORTED_SIGNALS"],"enum":["InfoType"],"fn":["boot_time","convert_signal","get_max_nb_fds","get_system_info_linux","getrlimit","read_table","read_table_key","read_u64","remaining_files","supported_signals","system_info_as_list"],"struct":["SystemInfo","SystemInner"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ThermalSensorType"],"fn":["convert_temp_celsius","fill_component","get_file_line","get_temperature_from_file","read_number_from_file","read_temp_dir"],"struct":["ComponentInner","ComponentsInner"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["parse_device_tree_compatible"],"struct":["MotherboardInner"]};

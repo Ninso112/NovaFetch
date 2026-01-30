@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["IS_SUPPORTED_SYSTEM"],"mod":["component","cpu","disk","motherboard","network","process","product","system","utils"]};

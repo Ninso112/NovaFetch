@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["KillError","ProcessStatus","ProcessesToUpdate","Signal","ThreadKind","UpdateKind"],"fn":["get_current_pid"],"macro":["pid_decl"],"struct":["CGroupLimits","Cpu","CpuRefreshKind","LoadAvg","MemoryRefreshKind","Motherboard","Pid","Process","ProcessRefreshKind","Product","RefreshKind","System"]};
