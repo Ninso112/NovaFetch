@@ -1,16 +1,19 @@
-//! Enhanced GPU detection: sysinfo components first, then lspci fallback.
+//! Enhanced GPU detection: lspci first (cleanest model name), then sysinfo components as fallback.
 
 use std::process::Command;
 
-/// Tries sysinfo components (e.g. hwmon/thermal labels, macOS TG0P), then lspci on Linux.
-/// Returns None on failure or if result is too generic.
+/// Prefer lspci (or platform equivalent) for the cleanest model name; fall back to sysinfo components.
+/// Sysinfo fallback skips sensor labels (junction, edge, mem, sensor, fan) so "amdgpu junction" is never shown.
 pub fn get_gpu_name() -> Option<String> {
+    if let Some(name) = try_lspci() {
+        return Some(name);
+    }
     if let Some(name) = try_sysinfo_components() {
         if !is_generic(&name) {
             return Some(name);
         }
     }
-    try_lspci()
+    None
 }
 
 fn is_generic(s: &str) -> bool {
@@ -22,20 +25,35 @@ fn is_generic(s: &str) -> bool {
         || (lower.len() < 4)
 }
 
+/// Sensor/subsystem labels to ignore when using sysinfo Components (hwmon thermal labels).
+fn is_sensor_or_subsystem_label(label: &str) -> bool {
+    let lower = label.to_lowercase();
+    lower.contains("junction")
+        || lower.contains("edge")
+        || lower.contains("mem")
+        || lower.contains("sensor")
+        || lower.contains("fan")
+        || lower.contains("temp")
+        || lower.contains("power")
+}
+
 fn try_sysinfo_components() -> Option<String> {
     use sysinfo::Components;
     let components = Components::new_with_refreshed_list();
     for comp in components.iter() {
-        let label = comp.label().to_lowercase();
+        let label = comp.label().trim();
+        let label_lower = label.to_lowercase();
+        if is_sensor_or_subsystem_label(label) {
+            continue;
+        }
         let id = comp.id().unwrap_or("").to_lowercase();
-        if label.contains("gpu")
+        if label_lower.contains("gpu")
             || id.contains("gpu")
             || id == "tg0p"
-            || label.contains("nvidia")
-            || label.contains("amd")
-            || label.contains("radeon")
+            || (label_lower.contains("nvidia") && !is_sensor_or_subsystem_label(label))
+            || (label_lower.contains("radeon") && !is_sensor_or_subsystem_label(label))
         {
-            let name = comp.label().trim().to_string();
+            let name = label.to_string();
             if !name.is_empty() && !is_generic(&name) {
                 return Some(name);
             }
@@ -57,7 +75,6 @@ fn try_lspci() -> Option<String> {
             || line.to_lowercase().contains("3d")
             || line.to_lowercase().contains("display")
         {
-            // lspci format: "xx:xx.x VGA compatible controller: NVIDIA ..."
             let after_first = line.splitn(2, ':').nth(1).unwrap_or(line).trim();
             let name = after_first
                 .splitn(2, ':')
@@ -65,7 +82,7 @@ fn try_lspci() -> Option<String> {
                 .unwrap_or(after_first)
                 .trim();
             if !name.is_empty() && !is_generic(name) {
-                return Some(clean_gpu_string(name));
+                return Some(crate::info::clean_gpu_name(name));
             }
         }
     }
@@ -75,13 +92,4 @@ fn try_lspci() -> Option<String> {
 #[cfg(not(target_os = "linux"))]
 fn try_lspci() -> Option<String> {
     None
-}
-
-fn clean_gpu_string(s: &str) -> String {
-    let mut t = s.trim().to_string();
-    for word in ["Corporation", "Inc.", "Co.", "Ltd.", "Limited"] {
-        t = t.replace(word, "");
-    }
-    t = t.replace("  ", " ");
-    t.trim().to_string()
 }

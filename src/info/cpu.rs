@@ -1,6 +1,8 @@
-//! CPU model name from sysinfo (first CPU, cleaned).
+//! CPU model name from sysinfo (first CPU, cleaned). Optionally appends temperature.
 
 use sysinfo::System;
+
+use crate::info::components;
 
 /// Collapse multiple spaces into one and trim.
 fn clean_cpu_name(s: &str) -> String {
@@ -21,5 +23,9 @@ pub fn get(sys: &System) -> (String, String) {
             }
         })
         .unwrap_or_else(|| "N/A".into());
-    ("CPU".into(), name)
+    let value = match components::get_temperature(&["k10temp", "coretemp", "package", "die"]) {
+        Some(t) => format!("{} ({:.1}°C)", name, t),
+        None => name,
+    };
+    ("CPU".into(), value)
 }
