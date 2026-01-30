@@ -66,6 +66,12 @@ pub struct Config {
     pub show_memory_bar: bool,
     #[serde(default = "default_true")]
     pub show_disk_bar: bool,
+    #[serde(default = "default_true")]
+    pub show_media: bool,
+    #[serde(default = "default_true")]
+    pub show_gpu: bool,
+    #[serde(default = "default_true")]
+    pub show_local_ip: bool,
     #[serde(default)]
     pub colors: ColorConfig,
 }
@@ -147,6 +153,9 @@ impl Default for Config {
             image_width: None,
             show_memory_bar: true,
             show_disk_bar: true,
+            show_media: true,
+            show_gpu: true,
+            show_local_ip: true,
             colors: ColorConfig::default(),
         }
     }

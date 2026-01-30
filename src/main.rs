@@ -1,5 +1,6 @@
 mod config;
 mod info;
+mod modules;
 mod ui;
 
 use clap::Parser;
@@ -8,14 +9,19 @@ use std::path::PathBuf;
 
 use config::Config;
 use info::{
-    cpu, de_wm, disk, distro_slug, gpu, kernel, memory, os, os_age, packages, resolution, shell,
-    swap, system_for_fetch, terminal, terminal_font, uptime, user_host, InfoItem,
+    cpu, de_wm, disk, distro_slug, get_gpu_name as info_gpu_name, gpu as info_gpu, kernel, memory,
+    os, os_age, packages, resolution, shell, swap, system_for_fetch, terminal, terminal_font,
+    uptime, user_host, InfoItem,
 };
 use ui::image_render;
 use ui::logos;
 use ui::{render, render_info_only, RenderOptions, SEPARATOR};
 
 use sysinfo::System;
+
+/// RGB gradient applied to ALL info labels (unified style). Value stays white/default.
+const GRADIENT_START: (u8, u8, u8) = (59, 130, 246);  // blue
+const GRADIENT_END: (u8, u8, u8) = (147, 51, 234);   // purple
 
 #[derive(Parser, Debug)]
 #[command(name = "novafetch")]
@@ -75,8 +81,17 @@ fn collect_system_info(config: &Config, sys: Option<&System>) -> Vec<InfoItem> {
         }
     }
     if config.gpu.enabled {
-        let (_, value) = gpu();
-        stats.push((config.gpu.label.clone(), value));
+        if config.show_gpu {
+            let value = modules::gpu::get_gpu_name()
+                .or_else(info_gpu_name)
+                .unwrap_or_else(|| "Generic GPU".into());
+            let label = if config.gpu.label.is_empty() { "GPU".into() } else { config.gpu.label.clone() };
+            stats.push((label, value));
+        } else {
+            let (default_label, value) = info_gpu();
+            let label = if config.gpu.label.is_empty() { default_label } else { config.gpu.label.clone() };
+            stats.push((label, value));
+        }
     }
     if config.memory.enabled {
         if let Some(ref s) = sys {
@@ -114,6 +129,16 @@ fn collect_system_info(config: &Config, sys: Option<&System>) -> Vec<InfoItem> {
     if config.os_age.enabled {
         let (_, value) = os_age();
         stats.push((config.os_age.label.clone(), value));
+    }
+    if config.show_media {
+        if let Some(value) = modules::media::get_media_status() {
+            stats.push(("Media".into(), value));
+        }
+    }
+    if config.show_local_ip {
+        if let Some(value) = modules::net::get_local_ip() {
+            stats.push(("Local IP".into(), value));
+        }
     }
 
     stats
@@ -178,6 +203,11 @@ fn main() {
     }
 
     // Rendering phase: image logo or ASCII logo + info
+    let gradient_spec = if args.no_color {
+        None
+    } else {
+        Some((GRADIENT_START, GRADIENT_END))
+    };
     let opts = RenderOptions {
         logo_lines: &[],
         stats: &stats,
@@ -187,6 +217,7 @@ fn main() {
         value_color: &config.colors.value,
         no_color: args.no_color,
         separator: SEPARATOR,
+        gradient_labels: gradient_spec,
     };
 
     let use_image = config

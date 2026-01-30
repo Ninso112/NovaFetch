@@ -1,6 +1,8 @@
 use colored::{Color, Colorize};
 use std::fmt::Display;
 
+use crate::ui::gradient;
+
 pub const SEPARATOR: &str = ": ";
 
 /// Visible character width of a string, ignoring ANSI escape sequences.
@@ -59,6 +61,9 @@ pub fn render_side_by_side(
     }
 }
 
+/// When set, ALL info labels are drawn with this RGB gradient (start -> end); value stays value_color.
+pub type GradientRgb = ((u8, u8, u8), (u8, u8, u8));
+
 pub struct RenderOptions<'a> {
     pub logo_lines: &'a [&'a str],
     pub stats: &'a [(String, String)],
@@ -69,6 +74,8 @@ pub struct RenderOptions<'a> {
     pub value_color: &'a str,
     pub no_color: bool,
     pub separator: &'a str,
+    /// If set, ALL labels are drawn with this RGB gradient; value stays value_color.
+    pub gradient_labels: Option<GradientRgb>,
 }
 
 fn apply_color(s: impl Display, color_name: &str, bold: bool) -> String {
@@ -130,9 +137,45 @@ pub fn format_logo_lines(logo_lines: &[&str], opts: &RenderOptions) -> Vec<Strin
         .collect()
 }
 
+/// Prints one info line: gradient label + separator + value (value in value_color).
+/// Used for unified visual style. Empty label = header line (value only).
+pub fn print_info_line(
+    label: &str,
+    value: &str,
+    separator: &str,
+    gradient: Option<GradientRgb>,
+    value_color: &str,
+    no_color: bool,
+) {
+    if label.is_empty() {
+        let value_out = if no_color {
+            apply_color_plain(value)
+        } else {
+            apply_color(value, value_color, false)
+        };
+        println!("{}", value_out);
+    } else {
+        let label_out = if no_color {
+            apply_color_plain(label)
+        } else if let Some((start_rgb, end_rgb)) = gradient {
+            gradient::create_gradient_text(label, start_rgb, end_rgb)
+        } else {
+            apply_color(label, "yellow", true)
+        };
+        let value_out = if no_color {
+            apply_color_plain(value)
+        } else {
+            apply_color(value, value_color, false)
+        };
+        println!("{}{}{}", label_out, separator, value_out);
+    }
+}
+
 /// Returns system info lines as Vec<String> (e.g. "GPU: ...") with ANSI colors applied.
+/// When gradient_labels is Some, ALL labels use the RGB gradient.
 pub fn format_info_lines(stats: &[(String, String)], opts: &RenderOptions) -> Vec<String> {
     let use_primary = opts.primary_color.is_some() && !opts.no_color;
+    let gradient_rgb = opts.gradient_labels;
     stats
         .iter()
         .map(|(key, value)| {
@@ -145,6 +188,8 @@ pub fn format_info_lines(stats: &[(String, String)], opts: &RenderOptions) -> Ve
             } else {
                 let key_out = if opts.no_color {
                     apply_color_plain(key)
+                } else if let Some((start_rgb, end_rgb)) = gradient_rgb {
+                    gradient::create_gradient_text(key, start_rgb, end_rgb)
                 } else if use_primary {
                     apply_color_enum(key, opts.primary_color.unwrap(), true)
                 } else {
@@ -177,9 +222,16 @@ pub fn render(opts: RenderOptions) {
 }
 
 /// Renders only the info lines (one per line). Used when an image is shown above.
+/// Uses print_info_line for unified gradient on all labels.
 pub fn render_info_only(opts: &RenderOptions) {
-    let info_strings = format_info_lines(opts.stats, opts);
-    for line in info_strings {
-        println!("{}", line);
+    for (label, value) in opts.stats.iter().map(|(k, v)| (k.as_str(), v.as_str())) {
+        print_info_line(
+            label,
+            value,
+            opts.separator,
+            opts.gradient_labels,
+            opts.value_color,
+            opts.no_color,
+        );
     }
 }
