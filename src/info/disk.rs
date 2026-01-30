@@ -24,21 +24,32 @@ pub fn get(show_bar: bool, label_prefix: &str) -> Vec<InfoItem> {
         let used = total.saturating_sub(avail);
         let total_mib = total / (1024 * 1024);
         let used_mib = used / (1024 * 1024);
+        let pct = if total > 0 {
+            (used as f64 / total as f64 * 100.0).round() as u32
+        } else {
+            0
+        };
+        let fs_type = d.file_system().to_string_lossy();
+        let fs_display = if fs_type.is_empty() {
+            "?".into()
+        } else {
+            fs_type.into_owned()
+        };
         let bar_str = if show_bar && total > 0 {
             bar::bar(used, total, 10)
         } else {
             String::new()
         };
         let value = if bar_str.is_empty() {
-            format!("{} MiB / {} MiB", used_mib, total_mib)
+            format!("{}% ({} MiB / {} MiB)", pct, used_mib, total_mib)
         } else {
-            format!("{} MiB / {} MiB [{}]", used_mib, total_mib, bar_str)
+            format!("{}% ({} MiB / {} MiB) [{}]", pct, used_mib, total_mib, bar_str)
         };
         let mount_display = mount_display_string(d.mount_point());
         let label = if label_prefix.is_empty() {
-            mount_display
+            format!("{} ({})", mount_display, fs_display)
         } else {
-            format!("{} ({})", label_prefix, mount_display)
+            format!("{} ({}, {})", label_prefix, mount_display, fs_display)
         };
         items.push((label, value));
     }

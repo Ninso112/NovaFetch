@@ -50,6 +50,12 @@ pub struct Config {
     pub terminal_font: ModuleConfig,
     #[serde(default = "default_packages")]
     pub packages: ModuleConfig,
+    #[serde(default = "default_resolution")]
+    pub resolution: ModuleConfig,
+    #[serde(default = "default_swap")]
+    pub swap: ModuleConfig,
+    #[serde(default = "default_os_age")]
+    pub os_age: ModuleConfig,
     #[serde(default = "default_true")]
     pub show_memory_bar: bool,
     #[serde(default = "default_true")]
@@ -97,6 +103,15 @@ fn default_terminal_font() -> ModuleConfig {
 fn default_packages() -> ModuleConfig {
     ModuleConfig::new(true, "Packages")
 }
+fn default_resolution() -> ModuleConfig {
+    ModuleConfig::new(true, "Resolution")
+}
+fn default_swap() -> ModuleConfig {
+    ModuleConfig::new(true, "Swap")
+}
+fn default_os_age() -> ModuleConfig {
+    ModuleConfig::new(true, "OS Age")
+}
 
 impl Default for Config {
     fn default() -> Self {
@@ -114,6 +129,9 @@ impl Default for Config {
             terminal: default_terminal(),
             terminal_font: default_terminal_font(),
             packages: default_packages(),
+            resolution: default_resolution(),
+            swap: default_swap(),
+            os_age: default_os_age(),
             show_memory_bar: true,
             show_disk_bar: true,
             colors: ColorConfig::default(),

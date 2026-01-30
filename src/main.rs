@@ -8,8 +8,8 @@ use std::path::PathBuf;
 
 use config::Config;
 use info::{
-    cpu, de_wm, disk, distro_slug, gpu, kernel, memory, os, packages, shell, system_for_fetch,
-    terminal, terminal_font, uptime, user_host, InfoItem,
+    cpu, de_wm, disk, distro_slug, gpu, kernel, memory, os, os_age, packages, resolution, shell,
+    swap, system_for_fetch, terminal, terminal_font, uptime, user_host, InfoItem,
 };
 use ui::logos;
 use ui::{render, RenderOptions, SEPARATOR};
@@ -37,7 +37,7 @@ struct Args {
 
 /// Data collection phase: gather all enabled system info into a list of (label, value).
 fn collect_system_info(config: &Config) -> Vec<InfoItem> {
-    let need_sys = config.memory.enabled || config.cpu.enabled;
+    let need_sys = config.memory.enabled || config.cpu.enabled || config.swap.enabled;
     let sys = need_sys.then(system_for_fetch);
 
     let mut stats: Vec<InfoItem> = Vec::with_capacity(20);
@@ -98,6 +98,20 @@ fn collect_system_info(config: &Config) -> Vec<InfoItem> {
     if config.packages.enabled {
         let (_, value) = packages();
         stats.push((config.packages.label.clone(), value));
+    }
+    if config.resolution.enabled {
+        let (_, value) = resolution();
+        stats.push((config.resolution.label.clone(), value));
+    }
+    if config.swap.enabled {
+        if let Some(ref s) = sys {
+            let (_, value) = swap(s);
+            stats.push((config.swap.label.clone(), value));
+        }
+    }
+    if config.os_age.enabled {
+        let (_, value) = os_age();
+        stats.push((config.os_age.label.clone(), value));
     }
 
     stats

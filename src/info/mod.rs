@@ -6,8 +6,11 @@ mod gpu;
 mod kernel;
 mod memory;
 mod os;
+mod os_age;
 mod packages;
+mod resolution;
 mod shell;
+mod swap;
 mod terminal;
 mod terminal_font;
 mod uptime;
@@ -75,6 +78,18 @@ pub fn terminal_font() -> InfoItem {
 
 pub fn packages() -> InfoItem {
     packages::get()
+}
+
+pub fn resolution() -> InfoItem {
+    resolution::get()
+}
+
+pub fn swap(sys: &System) -> InfoItem {
+    swap::get(sys)
+}
+
+pub fn os_age() -> InfoItem {
+    os_age::get()
 }
 
 /// Builds a System with only memory and CPU (name) refreshed for performance.
