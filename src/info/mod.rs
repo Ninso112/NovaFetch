@@ -14,6 +14,7 @@ mod shell;
 mod swap;
 mod terminal;
 mod terminal_font;
+mod theme;
 mod uptime;
 mod user_host;
 mod utils;
@@ -48,8 +49,8 @@ pub fn de_wm() -> InfoItem {
     de_wm::get()
 }
 
-pub fn cpu(sys: &System) -> InfoItem {
-    cpu::get(sys)
+pub fn cpu(sys: &System, show_bar: bool) -> InfoItem {
+    cpu::get(sys, show_bar)
 }
 
 /// Raw GPU name detection (OS-specific commands). Returns None on failure.
@@ -101,6 +102,12 @@ pub fn swap(sys: &System, unit_type: &str) -> InfoItem {
 
 pub fn os_age() -> InfoItem {
     os_age::get()
+}
+
+/// GTK theme, icon theme, and font from ~/.config/gtk-3.0/settings.ini.
+/// Returns one (label, value) per line: Theme, Icons, Font.
+pub fn theme() -> Vec<InfoItem> {
+    theme::get_theme_info()
 }
 
 /// Builds a System with only memory and CPU (name) refreshed for performance.

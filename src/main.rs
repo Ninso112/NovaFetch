@@ -11,7 +11,7 @@ use config::AppConfig;
 use info::{
     cpu, de_wm, disk, distro_slug, get_gpu_name as info_gpu_name, get_gpu_temperature, gpu as info_gpu,
     kernel, memory, os, os_age, packages, resolution, shell, swap, system_for_fetch, terminal,
-    terminal_font, uptime, user_host,
+    terminal_font, theme, uptime, user_host,
 };
 use sysinfo::System;
 use ui::image_render;
@@ -75,7 +75,7 @@ fn fetch_module(
         }
         "cpu" => {
             if let Some(s) = sys {
-                let (l, v) = cpu(s);
+                let (l, v) = cpu(s, config.general.show_cpu_bar);
                 out.push((key.to_string(), l, v));
             }
         }
@@ -126,6 +126,11 @@ fn fetch_module(
         "os_age" => {
             let (l, v) = os_age();
             out.push((key.to_string(), l, v));
+        }
+        "theme" => {
+            for (l, v) in theme() {
+                out.push((key.to_string(), l, v));
+            }
         }
         "media" => {
             if let Some(v) = modules::media::get_media_status() {
@@ -206,7 +211,11 @@ fn main() {
     let need_sys = config.layout.iter().any(|k| {
         k.as_str() == "memory" || k.as_str() == "cpu" || k.as_str() == "swap"
     });
-    let sys = need_sys.then(system_for_fetch);
+    let mut sys = need_sys.then(system_for_fetch);
+    if let Some(ref mut s) = sys {
+        std::thread::sleep(sysinfo::MINIMUM_CPU_UPDATE_INTERVAL);
+        s.refresh_cpu_usage();
+    }
     let lines = collect_lines(&config, sys.as_ref());
 
     if args.json {

@@ -17,7 +17,7 @@ pub fn get(sys: &System, show_bar: bool, unit_type: &str) -> (String, String) {
     let base = if bar_str.is_empty() {
         format!("{} / {}", used_str, total_str)
     } else {
-        format!("{} / {} [{}]", used_str, total_str, bar_str)
+        format!("{} {} / {}", bar_str, used_str, total_str)
     };
     let value = match components::get_ram_temperature() {
         Some(t) => format!("{} ({:.1}°C)", base, t),

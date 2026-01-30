@@ -30,6 +30,7 @@ fn default_layout() -> Vec<String> {
         "resolution".into(),
         "swap".into(),
         "os_age".into(),
+        "theme".into(),
         "media".into(),
         "local_ip".into(),
     ]
@@ -67,6 +68,8 @@ pub struct GeneralConfig {
     #[serde(default = "default_true")]
     pub show_memory_bar: bool,
     #[serde(default = "default_true")]
+    pub show_cpu_bar: bool,
+    #[serde(default = "default_true")]
     pub show_disk_bar: bool,
     #[serde(default)]
     pub image_path: Option<String>,
@@ -82,6 +85,7 @@ impl Default for GeneralConfig {
             align_values: true,
             unit_type: "standard".into(),
             show_memory_bar: true,
+            show_cpu_bar: true,
             show_disk_bar: true,
             image_path: None,
             image_width: None,

@@ -45,7 +45,7 @@ pub fn get(show_bar: bool, label_prefix: &str, unit_type: &str) -> Vec<InfoItem>
         let value = if bar_str.is_empty() {
             format!("{}% ({} / {})", pct, used_str, total_str)
         } else {
-            format!("{}% ({} / {}) [{}]", pct, used_str, total_str, bar_str)
+            format!("{} {}% ({} / {})", bar_str, pct, used_str, total_str)
         };
         let mount_display = mount_display_string(d.mount_point());
         let label = if label_prefix.is_empty() {
