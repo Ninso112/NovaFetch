@@ -58,6 +58,10 @@ pub struct Config {
     pub os_age: ModuleConfig,
     #[serde(default = "default_unit_type")]
     pub unit_type: String,
+    #[serde(default)]
+    pub image_path: Option<String>,
+    #[serde(default)]
+    pub image_width: Option<u32>,
     #[serde(default = "default_true")]
     pub show_memory_bar: bool,
     #[serde(default = "default_true")]
@@ -139,6 +143,8 @@ impl Default for Config {
             swap: default_swap(),
             os_age: default_os_age(),
             unit_type: default_unit_type(),
+            image_path: None,
+            image_width: None,
             show_memory_bar: true,
             show_disk_bar: true,
             colors: ColorConfig::default(),

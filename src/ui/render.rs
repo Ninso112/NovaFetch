@@ -175,3 +175,11 @@ pub fn render(opts: RenderOptions) {
 
     render_side_by_side(&logo_strings, &info_strings, logo_width, MARGIN);
 }
+
+/// Renders only the info lines (one per line). Used when an image is shown above.
+pub fn render_info_only(opts: &RenderOptions) {
+    let info_strings = format_info_lines(opts.stats, opts);
+    for line in info_strings {
+        println!("{}", line);
+    }
+}

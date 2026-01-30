@@ -1,8 +1,11 @@
 mod ascii;
+mod ascii_data;
+pub mod image_render;
 pub mod logos;
 mod render;
 
 pub use render::render;
+pub use render::render_info_only;
 pub use render::RenderOptions;
 pub use render::SEPARATOR;
 /// Low-level API: logo/info as `Vec<String>`, side-by-side layout.
