@@ -68,11 +68,11 @@ Each module has `enabled` (bool) and `label` (string). Other options include `sh
 
 - [ ] Add more ASCII logos (distros / variants)
 - [ ] Broader support for macOS and Windows (detection and logos)
-- [ ] Performance optimizations (e.g. fewer subprocess calls, cached results)
+- [ ] Performance optimizations (e.g., fewer subprocess calls, cached results)
 - [ ] Optional JSON/text output for scripting
 
 ---
 
 ## License
 
-MIT License (see [LICENSE](LICENSE)).
+GPLv3 — GNU General Public License v3.0 (see [LICENSE](LICENSE)).
