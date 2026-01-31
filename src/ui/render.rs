@@ -31,30 +31,42 @@ pub fn display_width(s: &str) -> usize {
 }
 
 /// Prints logo lines and info lines side-by-side. Logo is left-padded to a fixed width, then margin, then info.
-/// Shorter side is padded with empty lines so rows align.
+/// When logo is shorter than info, remaining info lines are indented to maintain alignment.
 pub fn print_final_result(
     logo_lines: &[String],
     info_lines: &[String],
     margin: usize,
 ) {
+    // Calculate the maximum display width of the logo (ignoring ANSI codes)
     let logo_width = logo_lines
         .iter()
         .map(|s| display_width(s))
         .max()
         .unwrap_or(0);
+    
     let num_rows = logo_lines.len().max(info_lines.len());
     let gap = " ".repeat(margin);
+    let empty_logo_padding = " ".repeat(logo_width);
 
     for i in 0..num_rows {
-        let logo_part = logo_lines.get(i).map(|s| s.as_str()).unwrap_or("");
-        let logo_visible = display_width(logo_part);
-        let pad_spaces = logo_width.saturating_sub(logo_visible);
-        print!("{}{}", logo_part, " ".repeat(pad_spaces));
+        // Get logo line or use empty padding if logo is finished
+        if let Some(logo_line) = logo_lines.get(i) {
+            let logo_visible = display_width(logo_line);
+            let pad_spaces = logo_width.saturating_sub(logo_visible);
+            print!("{}{}", logo_line, " ".repeat(pad_spaces));
+        } else {
+            // Logo finished: print spaces equal to logo_width to maintain alignment
+            print!("{}", empty_logo_padding);
+        }
+        
+        // Print gap between logo and info
         print!("{}", gap);
 
+        // Print info line if available
         if let Some(info) = info_lines.get(i) {
             print!("{}", info);
         }
+        
         println!();
     }
 }

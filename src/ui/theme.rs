@@ -2,7 +2,6 @@
 
 use crate::config::{AppConfig, GeneralConfig, ThemeConfig};
 use crate::ui::gradient;
-use crate::ui::render::display_width;
 use std::fmt::Write;
 
 /// Nerd Font icon (Unicode private use) per layout key. Empty string = no icon.
@@ -98,17 +97,5 @@ impl<'a> ThemeManager<'a> {
             ansi_rgb(self.theme.text_color),
             value
         )
-    }
-
-    /// Display width of a string (ignoring ANSI codes). Re-exported for alignment.
-    pub fn display_width(s: &str) -> usize {
-        display_width(s)
-    }
-
-    /// Pad formatted label to target width (in display cells), then separator.
-    pub fn pad_label_and_sep(&self, formatted_label: &str, target_width: usize) -> String {
-        let w = display_width(formatted_label);
-        let pad = target_width.saturating_sub(w);
-        format!("{}{}", formatted_label, " ".repeat(pad))
     }
 }
