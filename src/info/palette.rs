@@ -3,25 +3,29 @@
 /// Reset ANSI code.
 const RESET: &str = "\x1b[0m";
 
-/// Builds a string of colored blocks for the 8 standard (30–37) and optionally bright (90–97) ANSI colors.
+/// Builds two strings (normal + bright colors) for the 8 standard (30–37) and 8 bright (90–97) ANSI colors.
 /// Each block: `\x1b[{i}m██ \x1b[0m`. When `no_color` is true, returns plain blocks (no ANSI).
-pub fn get_color_palette(no_color: bool) -> String {
+/// Returns Vec with two elements: [normal_colors, bright_colors].
+pub fn get_color_palette(no_color: bool) -> Vec<String> {
     if no_color {
         return plain_blocks();
     }
-    let mut s = String::new();
+    
+    let mut normal = String::new();
     for i in 30..=37 {
-        s.push_str(&format!("\x1b[{}m██ {}", i, RESET));
+        normal.push_str(&format!("\x1b[{}m██ {}", i, RESET));
     }
-    s.push('\n');
+    
+    let mut bright = String::new();
     for i in 90..=97 {
-        s.push_str(&format!("\x1b[{}m██ {}", i, RESET));
+        bright.push_str(&format!("\x1b[{}m██ {}", i, RESET));
     }
-    s
+    
+    vec![normal, bright]
 }
 
-fn plain_blocks() -> String {
+fn plain_blocks() -> Vec<String> {
     let block = "██ ";
     let row: String = (0..8).map(|_| block).collect();
-    format!("{}\n{}", row.trim_end(), row.trim_end())
+    vec![row.trim_end().to_string(), row.trim_end().to_string()]
 }

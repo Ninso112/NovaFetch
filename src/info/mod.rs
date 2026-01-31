@@ -111,8 +111,9 @@ pub fn theme() -> Vec<InfoItem> {
     theme::get_theme_info()
 }
 
-/// ANSI color palette row (8 standard + 8 bright blocks). When no_color, returns plain blocks.
-pub fn get_color_palette(no_color: bool) -> String {
+/// ANSI color palette rows (8 standard + 8 bright blocks). When no_color, returns plain blocks.
+/// Returns Vec with two strings: [normal_colors, bright_colors].
+pub fn get_color_palette(no_color: bool) -> Vec<String> {
     palette::get_color_palette(no_color)
 }
 

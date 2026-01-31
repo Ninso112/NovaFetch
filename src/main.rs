@@ -144,7 +144,10 @@ fn fetch_module(
             }
         }
         "palette" => {
-            out.push((key.to_string(), String::new(), get_color_palette(no_color)));
+            // Palette returns Vec<String> with two lines (normal + bright colors)
+            for palette_line in get_color_palette(no_color) {
+                out.push((key.to_string(), String::new(), palette_line));
+            }
         }
         _ => {}
     }
@@ -265,11 +268,11 @@ fn build_tree_output(
     let mut hardware = Vec::new();
     let mut software = Vec::new();
     let mut status = Vec::new();
-    let mut palette_line = None;
+    let mut palette_lines = Vec::new();
 
     for (key, label, value) in lines {
         if key == "palette" {
-            palette_line = Some(value.clone());
+            palette_lines.push(value.clone());
             continue;
         }
         if let Some(cat) = categorize_key(key) {
@@ -330,9 +333,11 @@ fn build_tree_output(
         result.push(String::new());
     }
 
-    // Add palette at the very end if present
-    if let Some(palette) = palette_line {
-        result.push(theme.format_value(&palette));
+    // Add palette lines at the very end if present
+    if !palette_lines.is_empty() {
+        for palette_line in palette_lines {
+            result.push(theme.format_value(&palette_line));
+        }
     }
 
     result
