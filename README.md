@@ -1,112 +1,316 @@
-# NovaFetch
-
-**Fast, customizable, rice-ready system fetch written in Rust.**
-
-[![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-
-![NovaFetch Screenshot](assets/screenshot.png)
+<p align="center">
+  <h1 align="center">NovaFetch</h1>
+  <p align="center">
+    <strong>Fast, customizable, rice-ready system fetch tool written in Rust</strong>
+  </p>
+  <p align="center">
+    <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/Rust-1.70%2B-orange?style=flat-square&logo=rust" alt="Rust"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPLv3-blue?style=flat-square" alt="License"></a>
+    <img src="https://img.shields.io/badge/Platform-Linux-lightgrey?style=flat-square&logo=linux" alt="Platform">
+  </p>
+</p>
 
 ---
 
-## Features
+![NovaFetch Screenshot](assets/screenshot.png)
 
-- **TOML configuration** — Single config at `~/.config/novafetch/config.toml`. Reorder modules, set separator, theme, and ASCII options. Config is auto-generated on first run.
-- **RGB gradients** — Labels use a configurable gradient (primary → secondary) or solid color. Values stay in text color for readability.
-- **Modular layout** — Define exactly which modules appear and in what order via the `layout` array (e.g. `["os", "kernel", "uptime", "gpu", "media"]`).
-- **Nerd Fonts support** — Optional icons per module (OS, CPU, GPU, Memory, Disk, Terminal, Media, etc.) when `use_nerd_fonts = true`.
-- **Value alignment** — When `align_values = true`, separators line up vertically for a clean block of info.
-- **Image / ASCII logos** — Use a custom image (PNG, JPG, GIF) as logo, or distro ASCII art side-by-side with info. Control via `ascii.print_ascii`, `ascii.distro_override`, and `general.image_path`.
-- **Rich system info** — OS, Kernel, Uptime, Shell, DE, CPU, GPU, Memory, Disk, Terminal, Packages, Resolution, Swap, OS Age, GTK Theme, Media (MPRIS), Local IP, Color Palette.
-- **Tree-structured layout** — Categorized info (Hardware, Software, Status) with visual hierarchy using box-drawing characters.
-- **Customizable progress bars** — Multiple styles (Classic, Round, Retro, Minimal) for CPU, Memory, and Disk usage.
-- **JSON output** — `--json` prints all collected info as JSON for scripting.
+NovaFetch is a lightning-fast system information tool designed for Linux enthusiasts and ricers. It features a unique **tree-structured layout** that organizes system information into logical categories (Hardware, Software, Status), making your terminal output both informative and aesthetically pleasing.
+
+---
+
+## Key Features
+
+### Hierarchical Tree Layout
+Information is automatically grouped into three categories with box-drawing characters:
+- **Hardware** — Host, CPU, GPU, Memory, Disk, Resolution, Swap
+- **Software** — OS, Kernel, DE/WM, Shell, Terminal, Packages, Theme, OS Age  
+- **Status** — Uptime, Local IP, Media (Now Playing)
+
+```
+────────Hardware────────
+ Host: user@hostname
+ ├─ CPU: [▰▰▰▱▱▱▱▱] 15% @ 4.0GHz  AMD Ryzen 7 (43.9°C)
+ ├─ GPU: AMD Radeon RX 7900 (42.0°C)
+ └─ Memory: [▰▰▰▱▱▱▱▱] 7.63 GB / 30.92 GB
+
+────────Software────────
+ OS: Linux (Arch Linux rolling) x86_64
+ ├─ Kernel: Linux 6.18.3-arch1-1
+ ├─ Shell: bash 5.3.9
+ └─ Packages: 1251 (pacman)
+```
+
+### Visual Progress Bars
+Four switchable bar styles for CPU, Memory, and Disk usage:
+| Style | Appearance |
+|-------|------------|
+| **Classic** | `[████░░░░]` |
+| **Round** | `[▰▰▰▱▱▱]` |
+| **Retro** | `[####....]` |
+| **Minimal** | `●●●○○○` |
+
+### Rich System Information
+| Module | Description |
+|--------|-------------|
+| `user_host` | Username and hostname |
+| `os` | Distribution name and architecture |
+| `kernel` | Kernel version |
+| `uptime` | System uptime |
+| `shell` | Current shell and version |
+| `de` | Desktop Environment / Window Manager |
+| `cpu` | Model, frequency, usage %, temperature |
+| `gpu` | Model and temperature (AMD/NVIDIA/Intel) |
+| `memory` | Used/Total RAM with optional temperature |
+| `disk` | Usage per mount point (multiple disks supported) |
+| `swap` | Swap usage |
+| `terminal` | Terminal emulator name |
+| `terminal_font` | Terminal font |
+| `packages` | Package count (pacman, apt, dnf, etc.) |
+| `resolution` | Display resolution(s) |
+| `os_age` | System installation age |
+| `theme` | GTK Theme, Icons, Font |
+| `media` | Currently playing track (MPRIS) |
+| `local_ip` | Local IPv4 address |
+| `palette` | ANSI color palette (16 colors) |
+
+### Theming & Colors
+- **RGB Gradient Labels** — Smooth color transitions from primary to secondary color
+- **Solid Color Mode** — Single color for labels
+- **Customizable Colors** — Full RGB control via config
+- **Nerd Fonts Support** — Optional icons for each module
+
+### ASCII Art & Images
+- **30+ Distribution Logos** — Auto-detected or manually overridden
+- **Image Support** — Use custom PNG/JPG/GIF images as logos
+- **Side-by-Side Layout** — Logo and info displayed together with proper alignment
+
+### Output Formats
+- **Terminal** — Colored, formatted output (default)
+- **JSON** — Machine-readable output for scripting (`--json`)
+- **No Color** — Plain text mode (`--no-color`)
 
 ---
 
 ## Installation
 
-**Prerequisites:** [Rust](https://www.rust-lang.org/) and Cargo (e.g. via [rustup](https://rustup.rs/)).
+### Prerequisites
+- [Rust](https://www.rust-lang.org/) 1.70+ and Cargo (via [rustup](https://rustup.rs/))
+
+### Build from Source
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/yourusername/novafetch.git
 cd novafetch
+cargo build --release
+```
+
+### Install to PATH
+
+```bash
 cargo install --path .
 ```
 
-Then run `novafetch` from anywhere (Cargo installs to `~/.cargo/bin` by default). Alternatively:
+The binary is installed to `~/.cargo/bin/novafetch`.
+
+### Run
 
 ```bash
-cargo build --release
+# After installation
+novafetch
+
+# Or run directly from build
 ./target/release/novafetch
+```
+
+---
+
+## Usage
+
+```
+novafetch [OPTIONS]
+
+Options:
+      --logo <NAME>     Override ASCII art logo (e.g., arch, ubuntu, fedora)
+      --no-color        Disable colored output
+      --config <PATH>   Path to config file
+      --json            Output system info as JSON
+  -h, --help            Print help
+```
+
+### Examples
+
+```bash
+# Use Arch Linux logo regardless of detected distro
+novafetch --logo arch
+
+# Output JSON for scripting
+novafetch --json | jq '.Memory'
+
+# Use a custom config file
+novafetch --config ~/my-config.toml
+
+# Plain text output (no colors)
+novafetch --no-color
 ```
 
 ---
 
 ## Configuration
 
-On **first run**, if no config exists, NovaFetch creates a default config at:
+NovaFetch uses a TOML configuration file. On first run, a default config is automatically created at:
 
-- **`~/.config/novafetch/config.toml`** (Linux/macOS, XDG)
-- Or the platform-appropriate config directory (e.g. Windows).
+```
+~/.config/novafetch/config.toml
+```
 
-You can then edit this file to change colors, reorder the layout, set the separator, or override the ASCII distro.
-
-### Example config
+### Full Configuration Reference
 
 ```toml
 [general]
-separator = "  "       # Between label and value (e.g. "  ", " -> ", " :: ")
-use_nerd_fonts = true # Prepend Nerd Font icons to labels
-align_values = true   # Align separators vertically
-unit_type = "standard" # "standard" | "iec" | "si" for bytes
-show_memory_bar = true
-show_disk_bar = true
-# image_path = "/path/to/logo.png"
-# image_width = 36
+separator = "  "           # Separator between label and value
+use_nerd_fonts = true      # Show Nerd Font icons
+align_values = true        # Align values vertically
+unit_type = "standard"     # Byte units: "standard" | "iec" | "si"
+show_memory_bar = true     # Show progress bar for memory
+show_cpu_bar = true        # Show progress bar for CPU
+show_disk_bar = true       # Show progress bar for disk
+# image_path = "/path/to/image.png"  # Custom logo image
+# image_width = 36                    # Image width in characters
 
 [theme]
-# RGB [R, G, B]. Primary = label start / solid; secondary = gradient end; text = value color
-primary_color = [59, 130, 246]   # Blue
-secondary_color = [147, 51, 234] # Purple
-text_color = [255, 255, 255]     # White
-mode = "gradient"                # "gradient" or "solid"
+# RGB colors [R, G, B]
+primary_color = [59, 130, 246]     # Blue - gradient start / solid labels
+secondary_color = [147, 51, 234]   # Purple - gradient end
+text_color = [255, 255, 255]       # White - values
+mode = "gradient"                   # "gradient" or "solid"
 
 [ascii]
-print_ascii = true               # Show distro ASCII art (or image if image_path set)
-distro_override = null           # e.g. "arch", "ubuntu", "fedora", "macos", "fallback"
+print_ascii = true         # Show ASCII/image logo
+distro_override = null     # Force logo: "arch", "ubuntu", "fedora", etc.
 
-# Order and subset of modules. Only these keys are shown, in this order.
+# Module order and selection - only listed modules are shown
 layout = [
-  "user_host", "os", "kernel", "uptime", "shell", "de",
-  "cpu", "gpu", "memory", "disk", "terminal", "terminal_font",
-  "packages", "resolution", "swap", "os_age", "theme",
-  "media", "local_ip", "palette"
+    "user_host",
+    "os",
+    "kernel",
+    "uptime",
+    "shell",
+    "de",
+    "cpu",
+    "gpu",
+    "memory",
+    "disk",
+    "terminal",
+    "terminal_font",
+    "packages",
+    "resolution",
+    "swap",
+    "os_age",
+    "theme",
+    "media",
+    "local_ip",
+    "palette"
 ]
 ```
 
-### Layout keys
+### Customizing the Layout
 
-- `user_host` — User@host (no label)
-- `os`, `kernel`, `uptime`, `shell`, `de`
-- `cpu`, `gpu`, `memory`, `disk` (can emit multiple lines per mount)
-- `terminal`, `terminal_font`, `packages`, `resolution`, `swap`, `os_age`
-- `theme` — GTK Theme, Icons, and Font (from `~/.config/gtk-3.0/settings.ini`)
-- `media` — MPRIS (e.g. Spotify) now playing
-- `local_ip` — Local IPv4
-- `palette` — ANSI color palette (8 normal + 8 bright colors)
+Remove or reorder entries in the `layout` array to customize what information is displayed:
 
-Remove or reorder entries in `layout` to customize what you see.
+```toml
+# Minimal layout example
+layout = [
+    "user_host",
+    "os",
+    "cpu",
+    "memory",
+    "palette"
+]
+```
 
-### ASCII / distro override
+### Changing Bar Style
 
-- **`ascii.print_ascii`** — If `true`, show ASCII art (or image if `general.image_path` is set). If `false`, only the info block is printed.
-- **`ascii.distro_override`** — Force a logo: `"arch"`, `"ubuntu"`, `"fedora"`, `"macos"`, `"kali"`, `"gentoo"`, `"windows"`, `"fallback"`, etc. If unset, the tool detects the distro.
+Edit `src/info/bar.rs` and change the `CURRENT_BAR_STYLE` constant:
 
-**CLI overrides:** `--logo <name>` overrides the logo for this run; `--config /path/to/config.toml` uses a different config; `--no-color` disables colors; `--json` outputs JSON and exits.
+```rust
+pub const CURRENT_BAR_STYLE: BarStyle = BarStyle::Classic;  // or Round, Retro, Minimal
+```
+
+Then rebuild: `cargo build --release`
+
+---
+
+## Supported Distributions
+
+NovaFetch includes ASCII art for 30+ Linux distributions:
+
+| Distribution | Slug |
+|--------------|------|
+| Arch Linux | `arch` |
+| Debian | `debian` |
+| Ubuntu | `ubuntu` |
+| Fedora | `fedora` |
+| openSUSE | `opensuse` |
+| Gentoo | `gentoo` |
+| Linux Mint | `mint` |
+| Manjaro | `manjaro` |
+| EndeavourOS | `endeavouros` |
+| Pop!_OS | `popos` |
+| Kali Linux | `kali` |
+| Alpine | `alpine` |
+| NixOS | `nixos` |
+| Void Linux | `void` |
+| Artix | `artix` |
+| Garuda | `garuda` |
+| Rocky Linux | `rocky` |
+| AlmaLinux | `alma` |
+| macOS | `macos` |
+| Windows | `windows` |
+| *...and more* | |
+
+Use `--logo <slug>` to override auto-detection.
+
+---
+
+## Dependencies
+
+NovaFetch is built with carefully selected Rust crates:
+
+| Crate | Purpose |
+|-------|---------|
+| `sysinfo` | CPU, Memory, Disk, Process information |
+| `clap` | Command-line argument parsing |
+| `serde` + `toml` | Configuration file handling |
+| `colored` | Terminal color output |
+| `chrono` | Time and date formatting |
+| `mpris` | Media player information (D-Bus) |
+| `local-ip-address` | Network interface detection |
+| `display-info` | Screen resolution |
+| `viuer` + `image` | Image rendering in terminal |
+| `whoami` | User and hostname |
+
+---
+
+## Performance
+
+NovaFetch is written in Rust for:
+
+- **Speed** — Minimal startup time, efficient system calls
+- **Memory Safety** — No undefined behavior or memory leaks
+- **Low Resource Usage** — Small binary, minimal dependencies at runtime
+
+The tool only queries the system information modules specified in your layout, avoiding unnecessary overhead.
 
 ---
 
 ## License
 
-GPLv3 — GNU General Public License v3.0. See [LICENSE](LICENSE).
+NovaFetch is licensed under the **GNU General Public License v3.0**.
+
+See [LICENSE](LICENSE) for the full license text.
+
+---
+
+<p align="center">
+  <sub>Made with ❤️ and Rust</sub>
+</p>
