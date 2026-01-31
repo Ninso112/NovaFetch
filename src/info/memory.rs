@@ -1,6 +1,7 @@
 use sysinfo::System;
 
 use crate::info::bar;
+use crate::info::components;
 use crate::info::utils;
 
 pub fn get(sys: &System, show_bar: bool, unit_type: &str) -> (String, String) {
@@ -13,10 +14,14 @@ pub fn get(sys: &System, show_bar: bool, unit_type: &str) -> (String, String) {
     } else {
         String::new()
     };
-    let value = if bar_str.is_empty() {
+    let base = if bar_str.is_empty() {
         format!("{} / {}", used_str, total_str)
     } else {
-        format!("{} / {} [{}]", used_str, total_str, bar_str)
+        format!("{} {} / {}", bar_str, used_str, total_str)
+    };
+    let value = match components::get_ram_temperature() {
+        Some(t) => format!("{} ({:.1}°C)", base, t),
+        None => base,
     };
     ("Memory".into(), value)
 }

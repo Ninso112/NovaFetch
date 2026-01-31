@@ -29,10 +29,10 @@ pub fn get_gpu_name() -> Option<String> {
 #[cfg(target_os = "linux")]
 fn gpu_linux() -> Option<String> {
     if let Some(s) = gpu_linux_lspci() {
-        return Some(clean_gpu_string(&s));
+        return Some(crate::info::clean_gpu_name(&s));
     }
     if let Some(s) = gpu_linux_sysfs() {
-        return Some(clean_gpu_string(&s));
+        return Some(crate::info::clean_gpu_name(&s));
     }
     None
 }
@@ -109,7 +109,7 @@ fn gpu_windows() -> Option<String> {
             names.push(line.to_string());
         }
     }
-    prefer_dedicated_or_join(names).map(|s| clean_gpu_string(&s))
+    prefer_dedicated_or_join(names).map(|s| crate::info::clean_gpu_name(&s))
 }
 
 #[cfg(target_os = "macos")]
@@ -127,7 +127,7 @@ fn gpu_macos() -> Option<String> {
         if line.starts_with("Chipset Model:") {
             let name = line.strip_prefix("Chipset Model:").unwrap_or("").trim();
             if !name.is_empty() {
-                return Some(clean_gpu_string(name));
+                return Some(crate::info::clean_gpu_name(name));
             }
         }
     }
@@ -162,18 +162,3 @@ fn prefer_dedicated_or_join(mut gpus: Vec<String>) -> Option<String> {
     Some(gpus.join(", "))
 }
 
-/// Remove vendor repetition, "Corporation", "Inc.", extra spaces.
-fn clean_gpu_string(s: &str) -> String {
-    let mut t = s.trim().to_string();
-    for word in ["Corporation", "Inc.", "Co.", "Ltd.", "Limited"] {
-        t = t.replace(word, "");
-    }
-    t = t.replace("  ", " ");
-    t = t.trim().to_string();
-    if let Some((first, rest)) = t.split_once(' ') {
-        if rest.contains(first) {
-            t = rest.trim().to_string();
-        }
-    }
-    t.trim().to_string()
-}
