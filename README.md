@@ -5,6 +5,8 @@
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
+![NovaFetch Screenshot](assets/screenshot.png)
+
 ---
 
 ## Features
@@ -15,7 +17,9 @@
 - **Nerd Fonts support** — Optional icons per module (OS, CPU, GPU, Memory, Disk, Terminal, Media, etc.) when `use_nerd_fonts = true`.
 - **Value alignment** — When `align_values = true`, separators line up vertically for a clean block of info.
 - **Image / ASCII logos** — Use a custom image (PNG, JPG, GIF) as logo, or distro ASCII art side-by-side with info. Control via `ascii.print_ascii`, `ascii.distro_override`, and `general.image_path`.
-- **Rich system info** — OS, Kernel, Uptime, Shell, DE, CPU, GPU, Memory, Disk, Terminal, Packages, Resolution, Swap, OS Age, Media (MPRIS), Local IP.
+- **Rich system info** — OS, Kernel, Uptime, Shell, DE, CPU, GPU, Memory, Disk, Terminal, Packages, Resolution, Swap, OS Age, GTK Theme, Media (MPRIS), Local IP, Color Palette.
+- **Tree-structured layout** — Categorized info (Hardware, Software, Status) with visual hierarchy using box-drawing characters.
+- **Customizable progress bars** — Multiple styles (Classic, Round, Retro, Minimal) for CPU, Memory, and Disk usage.
 - **JSON output** — `--json` prints all collected info as JSON for scripting.
 
 ---
@@ -76,7 +80,8 @@ distro_override = null           # e.g. "arch", "ubuntu", "fedora", "macos", "fa
 layout = [
   "user_host", "os", "kernel", "uptime", "shell", "de",
   "cpu", "gpu", "memory", "disk", "terminal", "terminal_font",
-  "packages", "resolution", "swap", "os_age", "media", "local_ip"
+  "packages", "resolution", "swap", "os_age", "theme",
+  "media", "local_ip", "palette"
 ]
 ```
 
@@ -86,8 +91,10 @@ layout = [
 - `os`, `kernel`, `uptime`, `shell`, `de`
 - `cpu`, `gpu`, `memory`, `disk` (can emit multiple lines per mount)
 - `terminal`, `terminal_font`, `packages`, `resolution`, `swap`, `os_age`
+- `theme` — GTK Theme, Icons, and Font (from `~/.config/gtk-3.0/settings.ini`)
 - `media` — MPRIS (e.g. Spotify) now playing
 - `local_ip` — Local IPv4
+- `palette` — ANSI color palette (8 normal + 8 bright colors)
 
 Remove or reorder entries in `layout` to customize what you see.
 
