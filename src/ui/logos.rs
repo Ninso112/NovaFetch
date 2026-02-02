@@ -42,6 +42,7 @@ pub fn get_logo(slug: &str) -> (Vec<&'static str>, Color) {
         "parrot" | "parrotos" => (ascii_data::PARROT, Color::BrightWhite),
         "garuda" | "garudalinux" => (ascii_data::GARUDA, Color::Cyan),
         "nobara" | "nobaralinux" => (ascii_data::NOBARA, Color::Green),
+        "cachyos" | "cachy" => (ascii_data::CACHYOS, Color::Cyan),
         // Server / Enterprise
         "almalinux" | "alma" => (ascii_data::ALMALINUX, Color::Red),
         "rocky" | "rockylinux" => (ascii_data::ROCKY, Color::Blue),
@@ -63,13 +64,22 @@ pub fn get_logo(slug: &str) -> (Vec<&'static str>, Color) {
         _ => {
             // Family fallback: slug contains family name -> use that logo
             let slug_lower = slug.as_str();
-            if slug_lower.contains("arch") {
+            if slug_lower.contains("cachy") {
+                (ascii_data::CACHYOS, Color::Cyan)
+            } else if slug_lower.contains("arch") {
                 (ascii_data::ARCH, Color::Cyan)
             } else if slug_lower.contains("debian") {
                 (ascii_data::DEBIAN, Color::Red)
-            } else if slug_lower.contains("ubuntu") || slug_lower.contains("kubuntu") || slug_lower.contains("xubuntu") || slug_lower.contains("lubuntu") {
+            } else if slug_lower.contains("ubuntu")
+                || slug_lower.contains("kubuntu")
+                || slug_lower.contains("xubuntu")
+                || slug_lower.contains("lubuntu")
+            {
                 (ascii_data::UBUNTU, Color::BrightRed)
-            } else if slug_lower.contains("fedora") || slug_lower.contains("rhel") || slug_lower.contains("redhat") {
+            } else if slug_lower.contains("fedora")
+                || slug_lower.contains("rhel")
+                || slug_lower.contains("redhat")
+            {
                 (ascii_data::FEDORA, Color::Blue)
             } else if slug_lower.contains("suse") || slug_lower.contains("sles") {
                 (ascii_data::OPENSUSE, Color::Green)
@@ -79,7 +89,10 @@ pub fn get_logo(slug: &str) -> (Vec<&'static str>, Color) {
                 (ascii_data::MINT, Color::Green)
             } else if slug_lower.contains("manjaro") {
                 (ascii_data::MANJARO, Color::Green)
-            } else if slug_lower.contains("centos") || slug_lower.contains("rocky") || slug_lower.contains("alma") {
+            } else if slug_lower.contains("centos")
+                || slug_lower.contains("rocky")
+                || slug_lower.contains("alma")
+            {
                 (ascii_data::RHEL, Color::Blue)
             } else if slug_lower.contains("alpine") {
                 (ascii_data::ALPINE, Color::Blue)
@@ -123,6 +136,7 @@ pub fn supported_slugs() -> &'static [&'static str] {
         "parrot",
         "garuda",
         "nobara",
+        "cachyos",
         "almalinux",
         "rocky",
         "centos",
